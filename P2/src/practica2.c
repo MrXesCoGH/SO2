@@ -77,6 +77,30 @@ int main(int argc, char **argv[]){
     printf("ERR: Hi han parametres de mes");
   }
 
+  /*
+  * Now that the files were read, now we need to read the columns of the
+  * dades.csv in order to obtain the especified data we need to use for
+  * the program. In this case, the columns are:  15, 17, 18.
+  * Each column has an especified data:
+  *   - col. 15: Delay to the arriving airport, in minutes (int)
+  *   - col. 17: Origin airport, IATA Code.
+  *   - col. 18: Destiny airport, IATA Code.
+  */
+
+  for( int row_num = 0 ; row_num < len(dades_matrix); ++row_num){
+    // First of all, I get the rows of the dades_matrix were I stored the data
+    // of dades.csv.
+    char *rows = dades_matrix[row_num];
+    // Then, for the rows array, I get the value of the 15,17,18 columns and
+    // store them in another array of chars that will be used to get the values.
+      for (int col_num = 0; col_num < len(dades_matrix); ++col_num){
+          char *column_15 = rows[15];
+          char *column_17 = rows[17];
+          char *column_18 = rows[18];
+      }
+  }
+
+
 
 
 
