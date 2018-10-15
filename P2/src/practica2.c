@@ -6,8 +6,10 @@
 #include <linked-list/linked-list.h>
 
 void lectura(String path){
+   //The matrix where is going to be stored the data from the path param.
   char **str_matrix;
 
+  // Reading file process.
   FILE *fp;
 	char str[100];
 
@@ -40,22 +42,42 @@ void lectura(String path){
     		strcpy(str_matrix[i],str);
     		i++;
 	}
+
 	fclose(fp);
 
   return str_matrix;
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char **argv[]){
 
   /*
   * This gets the arguments entered when calling the program.
-  * In this case the arguments are 3: dades.csv, aeroports.csv and <origen>
+  * In this case the arguments are 4: program name, dades.csv, aeroports.csv and <origen>.
+  * Anything else will trigger an error, for example, if the parameters
+  * introduced are less than the needed will trigger the error of lacking param.
   */
 
-  if(argc == 3){
-      aeroports_matrix = lectura(argv[0]);
-      dades_matrix = lectura(argv[1]);
-      origen = argv[2];
+  char **aeroports_matrix;
+  char **dades_matrix;
+  char *origen;
+
+  if(argc == 4){
+      aeroports_matrix = lectura(argv[1]); //This has the matrix of the aeroports.csv
+      dades_matrix = lectura(argv[2]); //This has the matrix of the dades.csv
+      origen = argv[3]; //This is the origin aeroport especified by the user.
   }
+
+  // In case there are less parameters than needed.
+  else if (argc < 4){
+    printf("ERR: Falten parametres");
+  }
+
+  // In case there are more parameters than needed.
+  else{
+    printf("ERR: Hi han parametres de mes");
+  }
+
+
+
 
 }
