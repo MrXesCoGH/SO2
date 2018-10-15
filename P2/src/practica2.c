@@ -28,10 +28,8 @@ void lectura(String aeroports_path, String dades_path, rb_tree *a_tree, list *d_
         int h = strlen(str);
 		    //turn the \n to 0
     		str[h-1] = '\0';
-        //This creates a row in the matrix where it'll store the string.
+        //This creates a new node in the tree where it'll store the string.
     	  insert_node(a_tree, str);
-        //This copy the string inside the row of the matrix of chars created before.
-
 	}
 
 	fclose(fp);
