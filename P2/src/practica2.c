@@ -52,8 +52,12 @@ void lectura(String aeroports_path, String dades_path, rb_tree *a_tree, list *d_
         int h = strlen(str);
 		    //turn the \n to 0
     		str[h-1] = '\0';
+        list_data l_data = malloc(sizeof(list_data));
+
+        l_data = (str[15],str[17],str[18]);
+
         //This creates a new item in the list where it'll store the tuple.
-    	  insert_node(a_tree, str);
+    	  insert_list(d_list,l_data);
 	}
 
 	fclose(fp);
