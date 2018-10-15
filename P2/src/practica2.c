@@ -34,7 +34,29 @@ void lectura(String aeroports_path, String dades_path, rb_tree *a_tree, list *d_
 
 	fclose(fp);
 
-  return str_matrix;
+	fp = fopen(dades_path,"r");
+	if(fp == NULL){
+		perror("Error al obrir el fitxer");
+		return(-1);
+	}
+
+	if (fgets (str,100,fp) != NULL){
+		puts(str);
+	}
+
+	int MIDA = atoi(str); //This int stores the total number of lines that We read.
+	int i = 0; //This is just a simple counter used to iterate in the following loop.
+
+	while(fgets(str, MIDA, fp) != NULL && i < MIDA){
+        //Here it's stored the length of the char array.
+        int h = strlen(str);
+		    //turn the \n to 0
+    		str[h-1] = '\0';
+        //This creates a new item in the list where it'll store the tuple.
+    	  insert_node(a_tree, str);
+	}
+
+	fclose(fp);
 }
 
 int main(int argc, char **argv[]){
@@ -84,21 +106,14 @@ int main(int argc, char **argv[]){
   *   - col. 18: Destiny airport, IATA Code.
   */
 
-  char *column_15;
-  char *column_17;
-  char *column_18;
 
-  for( int row_num = 0 ; row_num < len(dades_matrix); ++row_num){
-    // First of all, I get the rows of the dades_matrix were I stored the data
-    // of dades.csv.
-    char *rows = dades_matrix[row_num];
-    // Then, for the rows array, I get the value of the 15,17,18 columns and
-    // store them in another array of chars that will be used to get the values.
-    column_15[row_num] = rows[15];
-    column_17[row_num] = rows[17];
-    column_18[row_num] = rows[18];
+  /* Delete the tree */
+  delete_tree(tree);
+  free(tree);
 
-  }
+  /* Delete the list */
+  delete_list(l);
+  free(l);
 
 
 
