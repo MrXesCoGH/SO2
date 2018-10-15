@@ -2,18 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <arbre-binari/red-black-tree.h>
-#include <linked-list/linked-list.h>
+#include "/arbre-binari/red-black-tree.h"
+#include "/linked-list/linked-list.h"
 
-void lectura(String path){
-   //The matrix where is going to be stored the data from the path param.
-  char **str_matrix;
-
+void lectura(String aeroports_path, String dades_path, rb_tree *a_tree, list *d_list){
   // Reading file process.
   FILE *fp;
 	char str[100];
 
-	fp = fopen(path,"r");
+	fp = fopen(aeroports_path,"r");
 	if(fp == NULL){
 		perror("Error al obrir el fitxer");
 		return(-1);
@@ -26,21 +23,15 @@ void lectura(String path){
 	int MIDA = atoi(str); //This int stores the total number of lines that We read.
 	int i = 0; //This is just a simple counter used to iterate in the following loop.
 
-	str_matrix = malloc(MIDA * sizeof(char *)); //We make the first malloc using number of lines stored previously.
-
 	while(fgets(str, MIDA, fp) != NULL && i < MIDA){
         //Here it's stored the length of the char array.
         int h = strlen(str);
-
 		    //turn the \n to 0
     		str[h-1] = '\0';
-
         //This creates a row in the matrix where it'll store the string.
-    		str_matrix[i] = (char*) malloc(h*sizeof(char));
-
+    	  insert_node(a_tree, str);
         //This copy the string inside the row of the matrix of chars created before.
-    		strcpy(str_matrix[i],str);
-    		i++;
+
 	}
 
 	fclose(fp);
@@ -57,14 +48,22 @@ int main(int argc, char **argv[]){
   * introduced are less than the needed will trigger the error of lacking param.
   */
 
-  char **aeroports_matrix;
-  char **dades_matrix;
+  rb_tree *aeroports_tree;
+  list *dades_list;
   char *origen;
 
   if(argc == 4){
-      aeroports_matrix = lectura(argv[1]); //This has the matrix of the aeroports.csv
-      dades_matrix = lectura(argv[2]); //This has the matrix of the dades.csv
-      origen = argv[3]; //This is the origin aeroport especified by the user.
+    /* Allocate memory for tree */
+    aeroports_tree = (rb_tree *) malloc(sizeof(rb_tree));
+    /* Initialize the tree */
+    init_tree(aeroports_tree);
+
+    dades_list = (list *) malloc(sizeof(dades_list));
+    init_list(dades_list);
+
+    //This reads every file needed in order to get the data we're going to use.
+    lectura(argv[1], argv[2], &aeroports_tree, &dades_list);
+    origen = argv[3]; //This is the origin aeroport especified by the user.
   }
 
   // In case there are less parameters than needed.
@@ -103,7 +102,7 @@ int main(int argc, char **argv[]){
 
   }
 
-  
+
 
 
 
