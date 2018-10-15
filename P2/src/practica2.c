@@ -78,6 +78,7 @@ int main(int argc, char **argv[]){
     /* Initialize the tree */
     init_tree(aeroports_tree);
 
+    /*Initialize the list*/
     dades_list = (list *) malloc(sizeof(dades_list));
     init_list(dades_list);
 
