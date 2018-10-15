@@ -20,10 +20,10 @@ void lectura(String aeroports_path, String dades_path, rb_tree *a_tree, list *d_
 		puts(str);
 	}
 
-	int MIDA = atoi(str); //This int stores the total number of lines that We read.
+	int MIDA_AERO = atoi(str); //This int stores the total number of lines that We read.
 	int i = 0; //This is just a simple counter used to iterate in the following loop.
 
-	while(fgets(str, MIDA, fp) != NULL && i < MIDA){
+	while(fgets(str, MIDA_AERO, fp) != NULL && i < MIDA_AERO){
         //Here it's stored the length of the char array.
         int h = strlen(str);
 		    //turn the \n to 0
@@ -44,18 +44,16 @@ void lectura(String aeroports_path, String dades_path, rb_tree *a_tree, list *d_
 		puts(str);
 	}
 
-	int MIDA = atoi(str); //This int stores the total number of lines that We read.
+	int MIDA_DADES = atoi(str); //This int stores the total number of lines that We read.
 	int i = 0; //This is just a simple counter used to iterate in the following loop.
 
-	while(fgets(str, MIDA, fp) != NULL && i < MIDA){
+	while(fgets(str, MIDA_DADES, fp) != NULL && i < MIDA_DADES){
         //Here it's stored the length of the char array.
         int h = strlen(str);
 		    //turn the \n to 0
     		str[h-1] = '\0';
         list_data l_data = malloc(sizeof(list_data));
-
         l_data = (str[15],str[17],str[18]);
-
         //This creates a new item in the list where it'll store the tuple.
     	  insert_list(d_list,l_data);
 	}
