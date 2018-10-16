@@ -42,7 +42,7 @@ void process(String aeroports_path, String dades_path, String origin){
           /* If the key is in the tree increment 'num' */
           n_data->num_vegades++;
         } else {
-          
+
           list d_list;
           d_list = (list*) malloc(sizeof(list));
           init_list(d_list);
@@ -90,7 +90,6 @@ void process(String aeroports_path, String dades_path, String origin){
     		str[h-1] = '\0';
         list_data l_data = malloc(sizeof(list_data)); //this creates the list item.
         //l_data is a tuple of the values of the columns 15,17,18 of the dades.csv
-        l_data = (str[15],str[17],str[18]);
         //This creates a new item in the list where it'll store the tuple.
     	  insert_list(d_list,l_data);
 	}
