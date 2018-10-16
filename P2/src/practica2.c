@@ -52,7 +52,8 @@ void lectura(String aeroports_path, String dades_path, rb_tree *a_tree, list *d_
         int h = strlen(str);
 		    //turn the \n to 0
     		str[h-1] = '\0';
-        list_data l_data = malloc(sizeof(list_data));
+        list_data l_data = malloc(sizeof(list_data)); //this creates the list item.
+        //l_data is a tuple of the values of the columns 15,17,18 of the dades.csv
         l_data = (str[15],str[17],str[18]);
         //This creates a new item in the list where it'll store the tuple.
     	  insert_list(d_list,l_data);
@@ -70,9 +71,9 @@ int main(int argc, char **argv[]){
   * introduced are less than the needed will trigger the error of lacking param.
   */
 
-  rb_tree *aeroports_tree;
-  list *dades_list;
-  char *origen;
+  rb_tree *aeroports_tree; //Tree which will be used to make every search.
+  list *dades_list; //linked list with the data from every airport.
+  char *origen; //char array where it'll be stored the origin argument.
 
   if(argc == 4){
     /* Allocate memory for tree */
