@@ -5,6 +5,13 @@
 #include "/arbre-binari/red-black-tree.h"
 #include "/linked-list/linked-list.h"
 
+void split_fn(const char*. size_t, void *){
+  
+}
+
+
+
+
 void process(String aeroports_path, String dades_path, String origin){
   tree *aeroports_tree;
   node_data *n_data;
