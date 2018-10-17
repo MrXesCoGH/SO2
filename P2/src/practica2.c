@@ -6,14 +6,21 @@
 #include "arbre-binari/red-black-tree.h"
 #include "linked-list/linked-list.h"
 
-char *split_fn(char *cadena, int col){
+
+/*Splitting function that collects the strings from the chain*/
+char *split_fn(char *chain, int col){
     char *splited = malloc(sizeof(char)*50);
-    int actual, columna = 0;
-    
-    for(int i= 0; i<strlen(cadena); i++){
-        if(cadena[i] == ','){
-            columna++;
-            if(columna == col){
+    int actual, column = 0;
+   	
+   	/*
+   	* For all the chain, it search for the commas, in case of finding one,
+   	* then it goes to the next position but if the actual position is equals
+   	* to the parameter one, then it returns the string that was between the commas. 
+   	*/
+    for(int i= 0; i<strlen(chain); i++){
+        if(chain[i] == ','){
+            column++;
+            if(column == col){
                 return splited;                
             }else{
                 strcpy(splited," ");                
@@ -21,7 +28,7 @@ char *split_fn(char *cadena, int col){
         }
         else{
             actual = strlen(splited);
-            splited[actual] = cadena[i];
+            splited[actual] = chain[i];
             splited[actual+1] ='\0';
         }
         
@@ -39,14 +46,17 @@ int main(int argc, char **argv[]){
     */
 
     if(argc == 4){
-        rb_tree *aeroports_tree;
+        rb_tree *airports_tree;
         node_data *n_data;
         
         /* Allocate memory for tree */
-        aeroports_tree = (rb_tree *) malloc(sizeof(rb_tree));
+        airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
         /* Initialize the tree */
-        init_tree(aeroports_tree);
+        init_tree(airports_tree);
 
+        //This integers acts as a boolean
+        int appeared = 0;
+        
         // Reading file process.
         FILE *fp;
         char str[100];
@@ -62,25 +72,18 @@ int main(int argc, char **argv[]){
             puts(str);
         }
 
-        int MIDA_AERO = atoi(str); //This int stores the total number of lines that We read.
         int i = 0; //This is just a simple counter used to iterate in the following loop.
 
-        while(fgets(str, MIDA_AERO, fp) != NULL && i < MIDA_AERO){
+        while(fgets(str, 5, fp) != NULL && i < 5){
             //Here it's stored the length of the char array.
-            //int h = strlen(str);
-            //turn the \n to 0
-            //str[h-1] = '\0';
             
             s = malloc(sizeof(char)*4);
             strcpy(s, str);
             s[3] = '\0';
             
             //This search if the str value is already inside the tree.
-            n_data = find_node(aeroports_tree, s);
-
-            if (n_data != NULL) {
-                /* If the key is in the tree increment 'num' */
-                n_data->num_vegades++;
+           	if(!appeared){
+           		appeared = 1;
             } else {
 
                 list* d_list;
@@ -90,21 +93,21 @@ int main(int argc, char **argv[]){
                 /* If the key is not in the tree, allocate memory for the data
                 * and insert in the tree */
                 n_data = malloc(sizeof(node_data));
-                n_data->l = malloc(sizeof(list));
+                n_data->l = d_list;
                 
                 /* This is the key by which the node is indexed in the tree */
                 n_data->key = str;
                 /* This is additional information that is stored in the tree */
-                n_data->num_vegades = 1;
-                n_data->l = d_list;
-                insert_node(aeroports_tree, n_data);
+                n_data->num_destinations = 1;
+                insert_node(airports_tree, n_data);
             }
         }
 
         fclose(fp);
         
-        char *origin, *destination;
-        int delay;
+        char *origin, *destination, *delay;
+        float delay_f;
+        list_data *l_data;
 
         fp = fopen((char*)argv[2],"r");
         if(fp == NULL){
@@ -116,9 +119,8 @@ int main(int argc, char **argv[]){
             puts(str);
         }
 
-        int MIDA_DADES = atoi(str); //This int stores the total number of lines that We read.        
+        int DATA_SIZE = atoi(str); //This int stores the total number of lines that We read.        
         i = 0;
-        
         
         /*
         * Now that the dades file is opened, I need to read the columns.
@@ -129,74 +131,90 @@ int main(int argc, char **argv[]){
         *   - col. 18: Destiny airport, IATA Code.
         */
         
-        while(fgets(str, MIDA_DADES, fp) != NULL && i < MIDA_DADES){
+        while(fgets(str, DATA_SIZE, fp) != NULL && i < DATA_SIZE){
             //Here it's stored the length of the char array.
             int h = strlen(str);
             
             //turn the \n to 0
             str[h-1] = '\0';
             
-            delay = atoi(split_fn(str,15));
+            //this uses the splitting function to obtain the values.
+            delay = split_fn(str,15);
             origin= split_fn(str,17);
             destination  = split_fn(str,18);      
             
             //this searchs if the node is already inside the tree.
             
-            n_data = find_node(aeroports_tree, origin);
+            n_data = find_node(airports_tree, origin);
+            l_data = find_list(n_data->l,destination);
         
-            if(n_data != NULL){
-                //in case it's inside, then the number of times appeared is rised by 1
-                n_data->num_vegades++;            
-            }else{
-                
-                list* d_list;
-                d_list = (list*) malloc(sizeof(list));
-                init_list(d_list);
+            if(l_data != NULL){
+            	//In case that the found l_data is inside the list of the node, then
+            	//the number of times that flight appears has to increase by 1.
+               	l_data->num_flights++;
 
-                /* If the key is not in the tree, allocate memory for the data
-                * and insert in the tree */
-                n_data = malloc(sizeof(node_data));
-                n_data->l = malloc(sizeof(list));
+               	//After that, if the flight also has delay, the total delay has to increase too.               	
+               	if(strcmp(delay,"NA") != 0) {
+               		delay_f = atof(delay);
+               		l_data->delay = l_data->delay + delay_f;
+               	}
+            }else{
+                //In the case the found l_data is null, then a new one has to be created, because a new flight
+                //has to be added to the flights list.
+                l_data = malloc(sizeof(list_data));
+                l_data->key = malloc((strlen(destination)+1)*sizeof(char));
                 
-                n_data = malloc(sizeof(node_data));
-                n_data->key = origin;
-                n_data->num_vegades = 1;
-                n_data->l = d_list;
+                strcpy(l_data->key, destination);
+                //Since is the first flight for the airport, then the total number of flights starts as 1.
+                l_data->num_flights = 1;
                 
-                insert_node(aeroports_tree,n_data);
-            }
-               
+                //Just as before, if the flight has delay, it has to be added too.
+                if(strcmp(delay, "NA")!=0){
+                	l_data->delay = atof(delay);
+                }
+                else{
+                	//In this case, the flight has no delay so the total value of the delays happens to be 0.
+                	l_data->delay = 0;
+                }
+                
+                //Then this new flight has to be added to the flight list and the number of destinations of the airport
+                //increases by 1.
+                insert_list(n_data->l, l_data);
+                n_data->num_destinations++;
+            }               
         }
         
         fclose(fp);
         
-        
-        n_data = find_node(aeroports_tree, (char*)argv[3]);
+        printf("Median delay for the airport %s:\n", (char*)argv[3]);
+
+        n_data = find_node(airports_tree, (char*)argv[3]);
         list_item *l_item = n_data->l->first;
-        list_data *l_data;
         
         while(l_item){
             l_data = l_item->data;
-            printf("The airport %s appears %d times\n", l_data->key, l_data->delay);
+            printf("   %s --> %.3f minutes\n", l_data->key, l_data->delay/l_data->num_flights);
             l_item = l_item->next;
             
         }
 
+        n_data = search(airports_tree);
+        printf("Airport with more destinations: %s, number: %d", n_data->key, n_data->num_destinations);
 
         /* Delete the tree */
-        delete_tree(aeroports_tree);
-        free(aeroports_tree);
+        delete_tree(airports_tree);
+        free(airports_tree);
         
     }    
 
     // In case there are less parameters than needed.
     else if (argc < 4){
-        printf("ERR: Falten parametres");
+        printf("ERR: There are lacking arguments");
     }
 
     // In case there are more parameters than needed.
     else{
-        printf("ERR: Hi han parametres de mes");
+        printf("ERR: There are more arguments than needed");
     }
     
     return 0;

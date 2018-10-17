@@ -2,11 +2,11 @@ FILES_C = practica2.c ./arbre-binari/red-black-tree.c ./linked-list/linked-list.
 
 TARGET = practica2
 
-LFLAGS = -lm
+LFLAGS = -lm 
 
 FILES_O =$(subst .c,.o,$(FILES_C))
 
-$(TARGET): $(FILES_O) makefile
+$(TARGET): $(FILES_O) makefile 
 	gcc $(FILES_O) -o $(TARGET) $(LFLAGS)
 
 all: $(TARGET) 

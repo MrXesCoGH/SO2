@@ -65,6 +65,49 @@ static int compare_key1_equal_to_key2(RBTREE_KEY_TYPE key1, RBTREE_KEY_TYPE key2
     return strcmp(key1,key2) == 0;
 }
 
+
+/*
+* This is a recursive search that goes through all the tree in order to find 
+* the node with the higher value. Because the nodes are airports, then with this search
+* the result will be the airport with more destinations in this case.
+*/
+static void recursive_search(node *node, node_data **n, int *value){
+    
+    if (node->left != NIL){
+        recursive_search(node->left, n, value);
+    }
+
+    if (node->right != NIL){
+        recursive_search(node->right, n, value);
+    }
+
+    if(n == NULL){
+        *n = node->data;
+    }else if(node->data->num_destinations > *value){
+        *value = node->data->num_destinations;
+        *n = node->data;
+    }
+}
+/*
+* This is a search function that calls the previous recursive search
+* in order to find the node with the higher value, which, in this case, are
+* destinations.
+*/
+node_data *search(rb_tree *tree){
+
+    node_data *n;
+    node_data **n_matrix = &n;
+
+    int value = 0;
+    int *value_pointer = &value;
+    
+    if (tree->root != NIL){
+        recursive_search(tree->root, n_matrix, value_pointer);
+    }
+    
+    return n;
+}
+
 /**
  * 
  * NO CANVIEU EL CODI QUE HI HA A SOTA LLEVAT QUE SAPIGUEU EL QUE ESTEU FENT.
