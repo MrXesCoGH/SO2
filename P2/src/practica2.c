@@ -118,6 +118,8 @@ int main(int argc, char **argv[]){
 
         int MIDA_DADES = atoi(str); //This int stores the total number of lines that We read.        
         i = 0;
+        
+        
         /*
         * Now that the dades file is opened, I need to read the columns.
         * In this case, the columns are:  15, 17, 18.
@@ -127,8 +129,6 @@ int main(int argc, char **argv[]){
         *   - col. 18: Destiny airport, IATA Code.
         */
         
-        
-
         while(fgets(str, MIDA_DADES, fp) != NULL && i < MIDA_DADES){
             //Here it's stored the length of the char array.
             int h = strlen(str);
@@ -144,7 +144,7 @@ int main(int argc, char **argv[]){
             
             n_data = find_node(aeroports_tree, origin);
         
-            if(n_data){
+            if(n_data != NULL){
                 //in case it's inside, then the number of times appeared is rised by 1
                 n_data->num_vegades++;            
             }else{
@@ -166,17 +166,22 @@ int main(int argc, char **argv[]){
                 insert_node(aeroports_tree,n_data);
             }
                
-            list *lista = n_data->l;
+        }
+        
+        fclose(fp);
+        
+        
+        n_data = find_node(aeroports_tree, (char*)argv[3]);
+        list_item *l_item = n_data->l->first;
+        list_data *l_data;
+        
+        while(l_item){
+            l_data = l_item->data;
+            printf("The airport %s appears %d times\n", l_data->key, l_data->delay);
+            l_item = l_item->next;
             
-            list_data *l_data= malloc(sizeof(list_data)); //this creates the list item
-            
-            l_data = find_list(lista,destination);
-            
-            //This creates a new item in the list where it'll store the tuple.
-            insert_list(n_data->l,l_data);
         }
 
-        fclose(fp);
 
         /* Delete the tree */
         delete_tree(aeroports_tree);
