@@ -37,6 +37,7 @@
 
 static void free_node_data(node_data *data)
 {
+    delete_list(data->l);
     free(data);
 }
 
@@ -49,14 +50,7 @@ static void free_node_data(node_data *data)
 
 static int compare_key1_less_than_key2(RBTREE_KEY_TYPE key1, RBTREE_KEY_TYPE key2)
 {
-    int rc;
-
-    rc = 0;
-
-    if (key1 < key2)
-        rc = 1;
-
-    return rc;
+    return strcmp(key1,key2) < 0;
 }
 
 /**
@@ -68,14 +62,7 @@ static int compare_key1_less_than_key2(RBTREE_KEY_TYPE key1, RBTREE_KEY_TYPE key
 
 static int compare_key1_equal_to_key2(RBTREE_KEY_TYPE key1, RBTREE_KEY_TYPE key2)
 {
-    int rc;
-
-    rc = 0;
-
-    if (key1 == key2)
-        rc = 1;
-
-    return rc;
+    return strcmp(key1,key2) == 0;
 }
 
 /**
