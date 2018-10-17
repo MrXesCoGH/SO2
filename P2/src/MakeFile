@@ -9,3 +9,9 @@ TARGET = practica2
 LFLAGS = -lm
 
 FILES_O =$(subst .c,.o,$(FILES_C))
+
+$(TARGET): $(FILES_O) Makefile
+	gcc $(FILES_O) -o $(TARGET) $(LFLAGS)
+
+clean:
+	/bin/rm $(FILES_O) $(TARGET) 
