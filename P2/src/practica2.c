@@ -89,12 +89,20 @@ void process(String aeroports_path, String dades_path, String origin){
 		    //turn the \n to 0
     		str[h-1] = '\0';
         list_data l_data = malloc(sizeof(list_data)); //this creates the list item.
-        //l_data is a tuple of the values of the columns 15,17,18 of the dades.csv
         //This creates a new item in the list where it'll store the tuple.
     	  insert_list(d_list,l_data);
 	}
 
 	fclose(fp);
+
+  /* Delete the tree */
+  delete_tree(tree);
+  free(tree);
+
+  /* Delete the list */
+  delete_list(l);
+  free(l);
+
 }
 
 int main(int argc, char **argv[]){
@@ -124,19 +132,4 @@ int main(int argc, char **argv[]){
   else{
     printf("ERR: Hi han parametres de mes");
   }
-
-  /* Delete the tree */
-  delete_tree(tree);
-  free(tree);
-
-  /* Delete the list */
-  delete_list(l);
-  free(l);
-
-
-
-
-
-
-
 }
