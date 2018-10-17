@@ -162,6 +162,7 @@ int main(int argc, char **argv[]){
                 //In the case the found l_data is null, then a new one has to be created, because a new flight
                 //has to be added to the flights list.
                 l_data = malloc(sizeof(list_data));
+//In the case of this strlen, the string has a \0 at the end which has to be considered.
                 l_data->key = malloc((strlen(destination)+1)*sizeof(char));
                 
                 strcpy(l_data->key, destination);
