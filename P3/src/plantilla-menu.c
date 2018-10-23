@@ -69,9 +69,6 @@ int main(int argc, char **argv)
 
                 /* Falta codi */
 
-                
-
-
                 break;
 
             case 2:
