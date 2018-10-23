@@ -1,6 +1,6 @@
 /**
  *
- * Practica 3 
+ * Practica 3
  *
  */
 
@@ -13,12 +13,12 @@
 #define MAGIC_NUMBER 0x0133C8F9
 
 /**
- * 
+ *
  *  Menu
- * 
+ *
  */
 
-int menu() 
+int menu()
 {
     char str[5];
     int opcio;
@@ -32,13 +32,13 @@ int menu()
     printf("   Escull opcio: ");
 
     fgets(str, 5, stdin);
-    opcio = atoi(str); 
+    opcio = atoi(str);
 
     return opcio;
 }
 
 /**
- * 
+ *
  *  Main procedure
  *
  */
@@ -68,6 +68,9 @@ int main(int argc, char **argv)
                 str2[strlen(str2)-1]=0;
 
                 /* Falta codi */
+
+                
+
 
                 break;
 
@@ -113,4 +116,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-

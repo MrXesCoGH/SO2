@@ -3,8 +3,8 @@
 
 #include <string.h>
 
-#include "arbre-binari/red-black-tree.h"
-#include "linked-list/linked-list.h"
+#include "red-black-tree.h"
+#include "linked-list.h"
 
 
 /*Splitting function that collects the strings from the chain*/
@@ -36,7 +36,7 @@ char *split_fn(char *chain, int col){
     return splited;
 }
 
-int main(int argc, char **argv[]){
+int main(int argc, char *argv[]){
 
     /*
     * This gets the arguments entered when calling the program.
@@ -72,33 +72,30 @@ int main(int argc, char **argv[]){
             puts(str);
         }
 
-        int i = 0; //This is just a simple counter used to iterate in the following loop.
+        int i = 0, cont; //This is just a simple counter used to iterate in the following loop.
 
         while(fgets(str, 5, fp) != NULL && i < 5){
-            //Here it's stored the length of the char array.
-
-            s = malloc(sizeof(char)*4);
-            strcpy(s, str);
-            s[3] = '\0';
 
             //This search if the str value is already inside the tree.
            	if(!appeared){
-           		appeared = 1;
+           		  appeared = 1;
             } else {
+                n_data = malloc(sizeof(node_data));
 
-                list* d_list;
-                d_list = (list*) malloc(sizeof(list));
-                init_list(d_list);
+                //Here it's stored the length of the char array.
+                s = malloc(sizeof(char)*4);
+                strcpy(s, str);
+                s[3] = '\0';
 
                 /* If the key is not in the tree, allocate memory for the data
                 * and insert in the tree */
-                n_data = malloc(sizeof(node_data));
-                n_data->l = d_list;
+                n_data->key = malloc((strlen(str)+1)*sizeof(char));
+                n_data->key = s;
 
-                /* This is the key by which the node is indexed in the tree */
-                strcpy(n_data->key, str);
-                /* This is additional information that is stored in the tree */
-                n_data->num_destinations = 1;
+                n_data->num_destinations = 0;
+                n_data->l = (list*) malloc(sizeof(list));
+                init_list(n_data->l);
+
                 insert_node(airports_tree, n_data);
             }
         }
@@ -137,7 +134,7 @@ int main(int argc, char **argv[]){
 
             //turn the \n to 0
             str[h-1] = '\0';
-
+            printf("Splitting the columns\n");
             //this uses the splitting function to obtain the values.
             delay = split_fn(str,15);
             origin= split_fn(str,17);
@@ -162,7 +159,7 @@ int main(int argc, char **argv[]){
                 //In the case the found l_data is null, then a new one has to be created, because a new flight
                 //has to be added to the flights list.
                 l_data = malloc(sizeof(list_data));
-//In the case of this strlen, the string has a \0 at the end which has to be considered.
+                //In the case of this strlen, the string has a \0 at the end which has to be considered.
                 l_data->key = malloc((strlen(destination)+1)*sizeof(char));
 
                 strcpy(l_data->key, destination);
@@ -192,15 +189,19 @@ int main(int argc, char **argv[]){
         n_data = find_node(airports_tree, (char*)argv[3]);
         list_item *l_item = n_data->l->first;
 
-        while(l_item){
+        /*while(l_item){
             l_data = l_item->data;
             printf("   %s --> %.3f minutes\n", l_data->key, l_data->delay/l_data->num_flights);
             l_item = l_item->next;
 
+        }*/
+
+        if(l_item){
+          l_data = l_item->
         }
 
-        n_data = search(airports_tree);
-        printf("Airport with more destinations: %s, number: %d", n_data->key, n_data->num_destinations);
+        n_data = find_node(airports_tree, (char*)argv[3]);
+        printf("\nAirport with more destinations: %s, number: %d", n_data->key, n_data->num_destinations);
 
         /* Delete the tree */
         delete_tree(airports_tree);
