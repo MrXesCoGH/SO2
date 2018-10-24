@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
 
         // Reading file process.
         FILE *fp;
-        char str[100];
+        char str[5], str2[310];
         char *s;
 
         fp = fopen((char*)argv[1],"r");
@@ -93,6 +93,8 @@ int main(int argc, char *argv[]){
                 n_data->key = s;
 
                 n_data->num_destinations = 0;
+
+                //Destinations list
                 n_data->l = (list*) malloc(sizeof(list));
                 init_list(n_data->l);
 
@@ -102,9 +104,23 @@ int main(int argc, char *argv[]){
 
         fclose(fp);
 
-        char *origin, *destination, *delay;
+        //char *origin, *destination, *delay;
+        int countRow, countWord;
+      	char delay[5], origin[4], destination[4];
+
         float delay_f;
         list_data *l_data;
+
+        for(i = 0; i<5; i++){
+      		if(i<4){
+      			delay[i] = '\0';
+      			origin[i] = '\0';
+      			destination[i] = '\0';
+      		}
+      		else{
+      			delay[i] = '\0';
+      		}
+      	}
 
         fp = fopen((char*)argv[2],"r");
         if(fp == NULL){
@@ -116,7 +132,7 @@ int main(int argc, char *argv[]){
             puts(str);
         }
 
-        int DATA_SIZE = atoi(str); //This int stores the total number of lines that We read.
+        //int DATA_SIZE = atoi(str); //This int stores the total number of lines that We read.
         i = 0;
 
         /*
@@ -128,17 +144,44 @@ int main(int argc, char *argv[]){
         *   - col. 18: Destiny airport, IATA Code.
         */
 
-        while(fgets(str, DATA_SIZE, fp) != NULL && i < DATA_SIZE){
+        while(fgets(str, 310, fp) != NULL){
+
+            if(!appeared){
+        			appeared = 1;
+        		}else{
+        			countRow = 0; i = 0;
+        			while(countRow < 18){
+        				if(str2[i] == ','){
+        					countWord = 0;
+        					countRow++;
+        				}else{
+        					if(countRow == 14){
+        						delay[countWord] = str2[i];
+        						countWord++;
+        					}if(countRow == 16){
+        						origin[countWord] = str2[i];
+        						countWord++;
+        					}else if(countRow == 17){
+        						destination[countWord] = str2[i];
+        						countWord++;
+        					}
+        				}
+        				i++;
+        			}
+            }
+
             //Here it's stored the length of the char array.
             int h = strlen(str);
 
             //turn the \n to 0
             str[h-1] = '\0';
-            printf("Splitting the columns\n");
+
+
+            /*printf("Splitting the columns\n");
             //this uses the splitting function to obtain the values.
             delay = split_fn(str,15);
             origin= split_fn(str,17);
-            destination  = split_fn(str,18);
+            destination  = split_fn(str,18);*/
 
             //this searchs if the node is already inside the tree.
 
@@ -184,24 +227,20 @@ int main(int argc, char *argv[]){
 
         fclose(fp);
 
-        printf("Median delay for the airport %s:\n", (char*)argv[3]);
+        printf("\nMedian delay for the airport %s:\n", (char*)argv[3]);
 
         n_data = find_node(airports_tree, (char*)argv[3]);
         list_item *l_item = n_data->l->first;
 
-        /*while(l_item){
+        while(l_item != NULL){
             l_data = l_item->data;
-            printf("   %s --> %.3f minutes\n", l_data->key, l_data->delay/l_data->num_flights);
+            printf("   %s --> %.3f minutes\n", l_data->key, (l_data->delay/l_data->num_flights));
             l_item = l_item->next;
 
-        }*/
-
-        if(l_item){
-          l_data = l_item->
         }
 
-        n_data = find_node(airports_tree, (char*)argv[3]);
-        printf("\nAirport with more destinations: %s, number: %d", n_data->key, n_data->num_destinations);
+        n_data = search(airports_tree);
+        printf("\nAirport with more destinations: %s, number: %d \n\n", n_data->key, n_data->num_destinations);
 
         /* Delete the tree */
         delete_tree(airports_tree);
