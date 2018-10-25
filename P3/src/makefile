@@ -1,6 +1,6 @@
-FILES_C = practica2.c red-black-tree.c linked-list.c
+FILES_C = main.c red-black-tree.c linked-list.c
 
-TARGET = practica2
+TARGET = main
 
 LFLAGS = -lm
 
