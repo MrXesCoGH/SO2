@@ -192,7 +192,7 @@ int main(int argc, char *argv[]){
                 //Then this new flight has to be added to the flight list and the number of destinations of the airport
                 //increases by 1.
                 insert_list(n_data->l, l_data);
-              //  n_data->num_destinations++;
+                //n_data->num_destinations++;
             }
         }
 
