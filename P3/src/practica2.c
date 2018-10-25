@@ -8,32 +8,41 @@
 
 
 /*Splitting function that collects the strings from the chain*/
-char *split_fn(char *chain, int col){
-    char *splited = malloc(sizeof(char)*50);
-    int actual, column = 0;
+void *split_fn(char *string, int col, char* result){
+      int index = 0;
+      int i = 0;
+      char delim = ',';
+      uint8_t found = 0;
 
-   	/*
-   	* For all the chain, it search for the commas, in case of finding one,
-   	* then it goes to the next position but if the actual position is equals
-   	* to the parameter one, then it returns the string that was between the commas.
-   	*/
-    for(int i= 0; i<strlen(chain); i++){
-        if(chain[i] == ','){
-            column++;
-            if(column == col){
-                return splited;
-            }else{
-                strcpy(splited," ");
-            }
-        }
-        else{
-            actual = strlen(splited);
-            splited[actual] = chain[i];
-            splited[actual+1] ='\0';
-        }
+      while (i < strlen(string) && !found) {
 
-    }
-    return splited;
+          if (string[i] == delim) {
+
+              // Comma found
+              col--;
+
+              // If we've reached our desired position before, we've
+              // retrieved the entire string.
+              if (col < 0) {
+                  found = 1;
+              }
+
+          } else {
+
+              // Normal character
+              if (col == 0) {
+
+                  // If we've reached our desired position, add character
+                  // to output string.
+                  result[index] = string[i];
+                  index++;
+              }
+          }
+
+          i++;
+
+      }
+  }
 }
 
 int main(int argc, char *argv[]){
@@ -104,23 +113,10 @@ int main(int argc, char *argv[]){
 
         fclose(fp);
 
-        //char *origin, *destination, *delay;
-        int countRow, countWord;
-      	char delay[5], origin[4], destination[4];
+        char *origin, *destination, *delay;
 
         float delay_f;
         list_data *l_data;
-
-        for(i = 0; i<5; i++){
-      		if(i<4){
-      			delay[i] = '\0';
-      			origin[i] = '\0';
-      			destination[i] = '\0';
-      		}
-      		else{
-      			delay[i] = '\0';
-      		}
-      	}
 
         fp = fopen((char*)argv[2],"r");
         if(fp == NULL){
@@ -146,42 +142,17 @@ int main(int argc, char *argv[]){
 
         while(fgets(str, 310, fp) != NULL){
 
-            if(!appeared){
-        			appeared = 1;
-        		}else{
-        			countRow = 0; i = 0;
-        			while(countRow < 18){
-        				if(str2[i] == ','){
-        					countWord = 0;
-        					countRow++;
-        				}else{
-        					if(countRow == 14){
-        						delay[countWord] = str2[i];
-        						countWord++;
-        					}if(countRow == 16){
-        						origin[countWord] = str2[i];
-        						countWord++;
-        					}else if(countRow == 17){
-        						destination[countWord] = str2[i];
-        						countWord++;
-        					}
-        				}
-        				i++;
-        			}
-            }
-
             //Here it's stored the length of the char array.
             int h = strlen(str);
 
             //turn the \n to 0
             str[h-1] = '\0';
 
-
-            /*printf("Splitting the columns\n");
+            printf("Splitting the columns\n");
             //this uses the splitting function to obtain the values.
-            delay = split_fn(str,15);
-            origin= split_fn(str,17);
-            destination  = split_fn(str,18);*/
+            split_fn(str,15, delay);
+            split_fn(str,17, origin);
+            split_fn(str,18, destination);
 
             //this searchs if the node is already inside the tree.
 
@@ -221,7 +192,7 @@ int main(int argc, char *argv[]){
                 //Then this new flight has to be added to the flight list and the number of destinations of the airport
                 //increases by 1.
                 insert_list(n_data->l, l_data);
-                n_data->num_destinations++;
+              //  n_data->num_destinations++;
             }
         }
 
