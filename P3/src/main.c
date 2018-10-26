@@ -68,6 +68,7 @@ void split_fn(char *string, int col, char* result){
                 result[index] = string[i];
                 index++;
             }
+            result[index] = 0;
         }
         i++;
     }
