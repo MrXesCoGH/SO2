@@ -280,8 +280,9 @@ int main(int argc, char **argv)
                 printf("Introdueix aeroport per cercar retard o polsa enter per saber l'aeroport amb mes destins: ");
                 fgets(str1, MAXLINE, stdin);
 
+                printf("String entrado: %s",str1);
                 //13 is the ASCII code of the enter key (\n).
-                if((int)str1 == 13){
+                if(str1 == "\n"){
 
                   n_data = search(airports_tree);
                   printf("\nAirport with more destinations: %s, number: %d \n\n", n_data->key, n_data->num_destinations);
