@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "red-black-tree.h"
+#include "linked-list.h"
+
 #define MAXLINE      200
 #define MAGIC_NUMBER 0x0133C8F9
 
@@ -17,6 +20,10 @@
  *  Menu
  *
  */
+
+void split_fn(char* string, int col, char* result);
+
+
 
 int menu()
 {
@@ -37,6 +44,35 @@ int menu()
     return opcio;
 }
 
+void split_fn(char *string, int col, char* result){
+    int index = 0;
+    int i = 0;
+    char delim = ',';
+    int found = 0;
+
+    while (i < strlen(string) && !found) {
+
+        if (string[i] == delim) {
+            // Comma found
+            col--;
+            // If we've reached our desired position before, we've
+            // retrieved the entire string.
+            if (col < 0) {
+                found = 1;
+            }
+        } else {
+            // Normal character
+            if (col == 0) {
+                // If we've reached our desired position, add character
+                // to output string.
+                result[index] = string[i];
+                index++;
+            }
+        }
+        i++;
+    }
+}
+
 /**
  *
  *  Main procedure
@@ -47,6 +83,8 @@ int main(int argc, char **argv)
 {
     char str1[MAXLINE], str2[MAXLINE];
     int opcio;
+
+    FILE *fp;
 
     rb_tree *airports_tree;
 
@@ -242,7 +280,8 @@ int main(int argc, char **argv)
                 printf("Introdueix aeroport per cercar retard o polsa enter per saber l'aeroport amb mes destins: ");
                 fgets(str1, MAXLINE, stdin);
 
-                if(str1 == "\n"){
+                //13 is the ASCII code of the enter key (\n).
+                if((int)str1 == 13){
 
                   n_data = search(airports_tree);
                   printf("\nAirport with more destinations: %s, number: %d \n\n", n_data->key, n_data->num_destinations);
