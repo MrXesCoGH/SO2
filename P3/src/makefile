@@ -12,7 +12,7 @@ $(TARGET): $(FILES_O) makefile
 all: $(TARGET)
 
 run: ./$(TARGET)
-	./$(TARGET) aeroports.csv dades.csv DEN
+	./$(TARGET) 
 
 clean:
 	/bin/rm $(FILES_O) $(TARGET)

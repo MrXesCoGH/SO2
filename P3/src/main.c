@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     init_tree(airports_tree);
 
     node_data *n_data;
-    int appeared = 0;
+    int appeared = 0; //Boolean statement
 
     char str[5];
     char *s;
