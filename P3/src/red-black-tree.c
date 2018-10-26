@@ -80,22 +80,31 @@ static void recursive_search(node *node, node_data **n, int *value){
     if (node->right != NIL){
         recursive_search(node->right, n, value);
     }
-
-    if(n == NULL){
+    
+    //If the node_data is NULL, then it'll have assigned new data.
+    
+    if(*n == NULL){
         *n = node->data;
+        
+    //If the node is not NULL, then this checks if the num_destinations is greater than the 
+    //value parameter, if it's true, then the value parameter is now equals to the num_destinations of the node_data.
+        
     }else if(node->data->num_destinations > *value){
+        
         *value = node->data->num_destinations;
         *n = node->data;
     }
 }
+
 /*
 * This is a search function that calls the previous recursive search
 * in order to find the node with the higher value, which, in this case, are
 * destinations.
 */
+
 node_data *search(rb_tree *tree){
 
-    node_data *n;
+    node_data *n = NULL;
     node_data **n_matrix = &n;
 
     int value = 0;

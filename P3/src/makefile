@@ -4,15 +4,20 @@ TARGET = main
 
 LFLAGS = -lm
 
+CFLAGS = -Wall -g
+
 FILES_O =$(subst .c,.o,$(FILES_C))
 
 $(TARGET): $(FILES_O) makefile
-	gcc $(FILES_O) -o $(TARGET) $(LFLAGS)
+	gcc -g $(FILES_O) -o $(TARGET) $(LFLAGS)
 
 all: $(TARGET)
 
 run: ./$(TARGET)
-	./$(TARGET) 
+	./$(TARGET)
+	
+%.o: %.c Makefile
+	gcc $(CFLAGS) -c $<
 
 clean:
 	/bin/rm $(FILES_O) $(TARGET)

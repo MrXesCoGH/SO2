@@ -12,7 +12,7 @@
 #include "red-black-tree.h"
 #include "linked-list.h"
 
-#define MAXLINE      200
+#define MAXLINE      400
 #define MAGIC_NUMBER 0x0133C8F9
 
 /**
@@ -51,7 +51,7 @@ void split_fn(char *string, int col, char* result){
     int found = 0;
 
     while (i < strlen(string) && !found) {
-
+        
         if (string[i] == delim) {
             // Comma found
             col--;
@@ -120,11 +120,11 @@ int main(int argc, char **argv)
                     return(-1);
                 }
 
-                if (fgets (str,100,fp) != NULL){
+                if (fgets (str,5,fp) != NULL){
                     puts(str);
                 }
 
-                int i = 0, cont; //This is just a simple counter used to iterate in the following loop.
+                int i = 0; //This is just a simple counter used to iterate in the following loop.
 
                 while(fgets(str, 5, fp) != NULL && i < 5){
 
@@ -136,9 +136,9 @@ int main(int argc, char **argv)
 
                         //Here it's stored the length of the char array.
                         s = malloc(sizeof(char)*4);
+                        str[3] ='\0';
                         strcpy(s, str);
-                        s[3] = '\0';
-
+                       
                         /* If the key is not in the tree, allocate memory for the data
                         * and insert in the tree */
                         n_data->key = malloc((strlen(str)+1)*sizeof(char));
@@ -162,6 +162,10 @@ int main(int argc, char **argv)
 
                 /* Falta codi */
                 char *origin, *destination, *delay;
+                
+                origin = ((char*) malloc(sizeof(char)*4));
+                delay = ((char*) malloc(sizeof(char)*10));
+                destination =((char*) malloc(sizeof(char)*4));
 
                 float delay_f;
                 list_data *l_data;
@@ -172,9 +176,7 @@ int main(int argc, char **argv)
                     return(-1);
                 }
 
-                if (fgets (str,100,fp) != NULL){
-                    puts(str);
-                }
+                fgets(str,400,fp); 
 
                 //int DATA_SIZE = atoi(str); //This int stores the total number of lines that We read.
                 i = 0;
@@ -186,65 +188,84 @@ int main(int argc, char **argv)
                 *   - col. 15: Delay to the arriving airport, in minutes (int)
                 *   - col. 17: Origin airport, IATA Code.
                 *   - col. 18: Destiny airport, IATA Code.
-                */
-
-                while(fgets(str, 310, fp) != NULL){
-
+                */ 
+                
+                while(fgets(str, MAXLINE , fp) != NULL){
+                    printf("primera linea: %s \n", str);
+                    
                     //Here it's stored the length of the char array.
                     int h = strlen(str);
 
                     //turn the \n to 0
                     str[h-1] = '\0';
 
-                    printf("Splitting the columns\n");
-                    //this uses the splitting function to obtain the values.
+                    //this uses the splitting function to obtain the values of the delay, the origin and
+                    //the destination of the airports.
+                    
                     split_fn(str,15, delay);
-                    printf("\nGot Delay: \n");
+                    
                     split_fn(str,17, origin);
-                    printf("\nGot Origin\n");
+                    
                     split_fn(str,18, destination);
-                    printf("\nGot Destination\n" );
+                    
+                    printf("Origen: %s \n", origin);
+                    printf("delay: %s \n", delay);
+                    printf("destination: %s \n",destination);
+                    
                     //this searchs if the node is already inside the tree.
 
                     n_data = find_node(airports_tree, origin);
-                    l_data = find_list(n_data->l,destination);
+                    
+                    if(n_data != NULL){
+                        printf("Airport found \n");
+                        
+                        l_data = find_list(n_data->l,destination);
 
-                    if(l_data != NULL){
-                      //In case that the found l_data is inside the list of the node, then
-                      //the number of times that flight appears has to increase by 1.
-                        l_data->num_flights++;
+                        if(l_data != NULL){
+                            //In case that the found l_data is inside the list of the node, then
+                            //the number of times that flight appears has to increase by 1.
+                            l_data->num_flights++;
 
-                        //After that, if the flight also has delay, the total delay has to increase too.
-                        if(strcmp(delay,"NA") != 0) {
-                          delay_f = atof(delay);
-                          l_data->delay = l_data->delay + delay_f;
+                            //After that, if the flight also has delay, the total delay has to increase too.
+                            if(strcmp(delay,"NA") != 0) {
+                                delay_f = atof(delay);
+                                l_data->delay = l_data->delay + delay_f;
+                            }
+                        }else{
+                            //In the case the found l_data is null, then a new one has to be created, because a new flight
+                            //has to be added to the flights list.
+                            l_data = malloc(sizeof(list_data));
+                            
+                            //In the case of this strlen, the string has a \0 at the end which has to be considered.
+                            l_data->key = malloc((strlen(destination)+1)*sizeof(char));
+
+                            strcpy(l_data->key, destination);
+                            
+                            //Since is the first flight for the airport, then the total number of flights starts as 1.
+                            l_data->num_flights = 1;
+
+                            //Just as before, if the flight has delay, it has to be added too.
+                            if(strcmp(delay, "NA")!=0){
+                                l_data->delay = atof(delay);
+                            }
+                            
+                            else{
+                            //In this case, the flight has no delay so the total value of the delays happens to be 0.
+                            l_data->delay = 0;
+                            
+                            }
+
+                            //Then this new flight has to be added to the flight list and the number of destinations of the airport
+                            //increases by 1.
+                            insert_list(n_data->l, l_data);
+                            n_data->num_destinations++;
                         }
-                    }else{
-                        //In the case the found l_data is null, then a new one has to be created, because a new flight
-                        //has to be added to the flights list.
-                        l_data = malloc(sizeof(list_data));
-                        //In the case of this strlen, the string has a \0 at the end which has to be considered.
-                        l_data->key = malloc((strlen(destination)+1)*sizeof(char));
-
-                        strcpy(l_data->key, destination);
-                        //Since is the first flight for the airport, then the total number of flights starts as 1.
-                        l_data->num_flights = 1;
-
-                        //Just as before, if the flight has delay, it has to be added too.
-                        if(strcmp(delay, "NA")!=0){
-                          l_data->delay = atof(delay);
-                        }
-                        else{
-                          //In this case, the flight has no delay so the total value of the delays happens to be 0.
-                          l_data->delay = 0;
-                        }
-
-                        //Then this new flight has to be added to the flight list and the number of destinations of the airport
-                        //increases by 1.
-                        insert_list(n_data->l, l_data);
-                        //n_data->num_destinations++;
                     }
                 }
+                
+                free(origin);
+                free(delay);
+                free(destination);
 
                 fclose(fp);
 
@@ -277,18 +298,21 @@ int main(int argc, char **argv)
                 break;
 
             case 4:
-                printf("Introdueix aeroport per cercar retard o polsa enter per saber l'aeroport amb mes destins: ");
+                printf("Introdueix aeroport per cercar retard o polsa enter per saber l'aeroport amb mes destinacions: ");
                 fgets(str1, MAXLINE, stdin);
 
                 printf("String entrado: %s",str1);
-                //13 is the ASCII code of the enter key (\n).
-                if(str1 == "\n"){
-
-                  n_data = search(airports_tree);
-                  printf("\nAirport with more destinations: %s, number: %d \n\n", n_data->key, n_data->num_destinations);
+                //10 is the ASCII code of the enter key (\n).
+                if(str1[0] == '\n'){
+                    printf("Enter\n");
+                    n_data = search(airports_tree);
+                    if (n_data)
+                        printf("\nAirport with more destinations: %s, number: %d \n\n", n_data->key, n_data->num_destinations);
+                    else 
+                        printf("No he trobat l'aeroport amb mes destinacions\n");
 
                 }else{
-                  str1[strlen(str1)-1]=0;
+                    str1[strlen(str1)-1]=0;
 
                   printf("\nMedian delay for the airport %s:\n", str1);
 
@@ -296,6 +320,7 @@ int main(int argc, char **argv)
                   list_item *l_item = n_data->l->first;
 
                   while(l_item != NULL){
+                      
                       l_data = l_item->data;
                       printf("   %s --> %.3f minutes\n", l_data->key, (l_data->delay/l_data->num_flights));
                       l_item = l_item->next;
