@@ -1,0 +1,7 @@
+/tmp/cckreGjl.o: En la función `main':
+main.c:(.text+0x83): referencia a `init_tree' sin definir
+main.c:(.text+0xcd): referencia a `find_node' sin definir
+main.c:(.text+0x120): referencia a `insert_node' sin definir
+main.c:(.text+0x151): referencia a `find_node' sin definir
+main.c:(.text+0x1af): referencia a `delete_tree' sin definir
+collect2: error: ld returned 1 exit status
