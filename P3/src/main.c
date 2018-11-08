@@ -98,7 +98,6 @@ int main(int argc, char **argv)
     int appeared = 0; //Boolean statement
 
     char str[5];
-    char *s;
 
     if (argc != 1)
         printf("Opcions de la linia de comandes ignorades\n");
@@ -135,23 +134,21 @@ int main(int argc, char **argv)
                     } else {
                         n_data = malloc(sizeof(node_data));
 
-                        //Here it's stored the length of the char array.
-                        s = malloc(sizeof(char)*4);
                         str[3] ='\0';
-                        strcpy(s, str);
-                       
+
                         /* If the key is not in the tree, allocate memory for the data
                         * and insert in the tree */
                         n_data->key = malloc((strlen(str)+1)*sizeof(char));
-                        n_data->key = s;
+                        strcpy(n_data->key, str);
 
                         n_data->num_destinations = 0;
 
                         //Destinations list
-                        n_data->l = (list*) malloc(sizeof(list));
+                        n_data->l = ((list*) malloc(sizeof(list)));
                         init_list(n_data->l);
 
                         insert_node(airports_tree, n_data);
+                
                     }
                 }
 
@@ -166,7 +163,7 @@ int main(int argc, char **argv)
                 
                 origin = ((char*) malloc(sizeof(char)*4));
                 delay = ((char*) malloc(sizeof(char)*10));
-                destination =((char*) malloc(sizeof(char)*4));
+                destination =((char*) malloc(sizeof(char)*5));
 
                 float delay_f;
                 list_data *l_data;
@@ -192,7 +189,6 @@ int main(int argc, char **argv)
                 */ 
                 
                 while(fgets(str, MAXLINE , fp) != NULL){
-                    printf("primera linea: %s \n", str);
                     
                     //Here it's stored the length of the char array.
                     int h = strlen(str);
@@ -209,16 +205,16 @@ int main(int argc, char **argv)
                     
                     split_fn(str,18, destination);
                     
-                    printf("Origen: %s \n", origin);
+                    /*printf("Origen: %s \n", origin);
                     printf("delay: %s \n", delay);
-                    printf("destination: %s \n",destination);
+                    printf("destination: %s \n",destination);*/
                     
                     //this searchs if the node is already inside the tree.
 
                     n_data = find_node(airports_tree, origin);
                     
                     if(n_data != NULL){
-                        printf("Airport found \n");
+                       //printf("Airport found \n");
                         
                         l_data = find_list(n_data->l,destination);
 
@@ -303,7 +299,7 @@ int main(int argc, char **argv)
                 fgets(str1, MAXLINE, stdin);
 
                 printf("String entrado: %s",str1);
-                //10 is the ASCII code of the enter key (\n).
+                
                 if(str1[0] == '\n'){
                     printf("Enter\n");
                     n_data = search(airports_tree);
@@ -315,25 +311,36 @@ int main(int argc, char **argv)
                 }else{
                     str1[strlen(str1)-1]=0;
 
-                  printf("\nMedian delay for the airport %s:\n", str1);
+                    printf("\nMedian delay for the airport %s:\n", str1);
 
-                  n_data = find_node(airports_tree, str1);
-                  list_item *l_item = n_data->l->first;
+                    n_data = find_node(airports_tree, str1);
+                    
+                    if(n_data){
+                        printf("Airport %s found \n", n_data->key);
+                    
+                        list_item *l_item;
+                        
+                        l_item = n_data->l->first;
+                        
+                        i=0;
+                        while(l_item != NULL){
+                            i++;
+                            float median;
+                            l_data = l_item->data;
+                            
+                            median = (float)l_data->delay/(float)l_data->num_flights;
+                            
+                            printf("   %s --> %.3f minutes\n", n_data->key, median);
+                            l_item = l_item->next;
 
-                  while(l_item != NULL){
-                      
-                      l_data = l_item->data;
-                      printf("   %s --> %.3f minutes\n", l_data->key, (l_data->delay/l_data->num_flights));
-                      l_item = l_item->next;
-
-                  }
+                        }
+                    }
                 }
 
                 break;
 
             case 5:
 
-                /* Falta codi */
                 delete_tree(airports_tree);
                 free(airports_tree);
 
