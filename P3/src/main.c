@@ -158,7 +158,6 @@ int main(int argc, char **argv)
                 fgets(str2, MAXLINE, stdin);
                 str2[strlen(str2)-1]=0;
 
-                /* Falta codi */
                 char *origin, *destination, *delay;
                 
                 origin = ((char*) malloc(sizeof(char)*4));
@@ -176,7 +175,6 @@ int main(int argc, char **argv)
 
                 fgets(str,400,fp); 
 
-                //int DATA_SIZE = atoi(str); //This int stores the total number of lines that We read.
                 i = 0;
 
                 /*
@@ -204,10 +202,6 @@ int main(int argc, char **argv)
                     split_fn(str,17, origin);
                     
                     split_fn(str,18, destination);
-                    
-                    /*printf("Origen: %s \n", origin);
-                    printf("delay: %s \n", delay);
-                    printf("destination: %s \n",destination);*/
                     
                     //this searchs if the node is already inside the tree.
 
