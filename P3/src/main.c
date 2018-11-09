@@ -388,7 +388,8 @@ int main(int argc, char **argv)
                     fread(airp, sizeof(char), len, fp);
                     airp[len] = 0;
 
-                    
+                    //fread(&num_destinations, sizeof(int),1,fp);
+
                 }
 
 
