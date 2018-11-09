@@ -76,10 +76,31 @@ void split_fn(char *string, int col, char* result){
     }
 }
 
+void writeTreeList(list *l, FILE *fp){
+    list_item *actual;
+    actual = l->first;
+    
+    while (actual != NULL){
+        list_data *data = actual->data;
+        
+        if(data != NULL){
+            fwrite(data->key, sizeof(char), 3,fp);
+            fwrite(&data->num_flights, sizeof(int), 1, fp);
+            fwrite(&data->delay, sizeof(int), 1, fp);
+        }
+        
+        actual = actual->next;
+    }    
+}
+
 void writeTreeData(node_data *n_data, FILE *fp){
-    fwrite(n_data->key, sizeof(char), strlen(n_data->key),fp);
+    
+    fwrite(n_data->key, sizeof(char),3,fp);
+    
     fwrite(&n_data->num_destinations, sizeof(int),1,fp);
-    fwrite(n_data->l, sizeof(list), n_data->l->num_items, fp);
+    printf("%d\n",n_data->num_destinations);
+    
+    writeTreeList(n_data->l,fp);
 }
 
 void writeTreeRecursive(node *n, FILE *fp){
@@ -87,7 +108,7 @@ void writeTreeRecursive(node *n, FILE *fp){
           writeTreeRecursive(n->right, fp);
       if(n->left != NIL)
           writeTreeRecursive(n->left, fp);
-
+      printf("key: %s\n", n->data->key);
       writeTreeData(n->data, fp);
 }
 
@@ -110,6 +131,8 @@ int countTreeRecursive(node *n){
 
     return ((int)1) + rightCount + leftCount;
 }
+
+
 /**
  *
  *  Main procedure
@@ -124,9 +147,10 @@ int main(int argc, char **argv)
     FILE *fp;
 
     rb_tree *airports_tree;
-
+                   
     /* Allocate memory for tree */
     airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
+    
     /* Initialize the tree */
     init_tree(airports_tree);
 
@@ -146,6 +170,18 @@ int main(int argc, char **argv)
 
         switch (opcio) {
             case 1:
+               if(airports_tree){
+                    printf("\nFreeing the actual tree\n");
+                    delete_tree(airports_tree);
+                    free(airports_tree);
+                }            
+               
+                /* Allocate memory for tree */
+                airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
+                
+                /* Initialize the tree */
+                init_tree(airports_tree);
+                
                 printf("Introdueix fitxer que conte llistat d'aeroports: ");
                 fgets(str1, MAXLINE, stdin);
                 str1[strlen(str1)-1]=0;
@@ -170,7 +206,7 @@ int main(int argc, char **argv)
                     } else {
                         n_data = malloc(sizeof(node_data));
 
-                        str[3] ='\0';
+                        str[3] =0;
 
                         /* If the key is not in the tree, allocate memory for the data
                         * and insert in the tree */
@@ -180,7 +216,7 @@ int main(int argc, char **argv)
                         n_data->num_destinations = 0;
 
                         //Destinations list
-                        n_data->l = ((list*) malloc(sizeof(list)));
+                        n_data->l =  malloc(sizeof(list));
                         init_list(n_data->l);
 
                         insert_node(airports_tree, n_data);
@@ -233,19 +269,18 @@ int main(int argc, char **argv)
                     //this uses the splitting function to obtain the values of the delay, the origin and
                     //the destination of the airports.
 
-                    split_fn(str,15, delay);
+                    split_fn(str,14, delay);
 
-                    split_fn(str,17, origin);
+                    split_fn(str,16, origin);
 
-                    split_fn(str,18, destination);
+                    split_fn(str,17, destination);
 
                     //this searchs if the node is already inside the tree.
 
                     n_data = find_node(airports_tree, origin);
 
                     if(n_data != NULL){
-                       //printf("Airport found \n");
-
+                        
                         l_data = find_list(n_data->l,destination);
 
                         if(l_data != NULL){
@@ -255,7 +290,7 @@ int main(int argc, char **argv)
 
                             //After that, if the flight also has delay, the total delay has to increase too.
                             if(strcmp(delay,"NA") != 0) {
-                                delay_f = atof(delay);
+                                delay_f = atoi(delay);
                                 l_data->delay = l_data->delay + delay_f;
                             }
                         }else{
@@ -273,7 +308,7 @@ int main(int argc, char **argv)
 
                             //Just as before, if the flight has delay, it has to be added too.
                             if(strcmp(delay, "NA")!=0){
-                                l_data->delay = atof(delay);
+                                l_data->delay = atoi(delay);
                             }
 
                             else{
@@ -325,6 +360,8 @@ int main(int argc, char **argv)
                 fwrite(&num_nodes, sizeof(int),1,fp);
 
                 writeTree(airports_tree,fp);
+                
+                fclose(fp);
 
                 break;
 
@@ -342,7 +379,7 @@ int main(int argc, char **argv)
                 /* Falta codi */
                 printf("Reading tree from file %s \n", str1);
 
-                fp = fopen(str,"r");
+                fp = fopen(str1,"r");
 
                 if(!fp){
                     printf("ERR: Unable to open the file\n");
@@ -352,45 +389,71 @@ int main(int argc, char **argv)
                 fread(&magicNumber,sizeof(int),1,fp);
 
                 if (magicNumber != MAGIC_NUMBER){
-                  printf("ERR: Incorrect magic number");
-                  exit(EXIT_FAILURE);
+                    printf("ERR: Incorrect magic number");
+                    exit(EXIT_FAILURE);
+                }else{
+                    printf("\nCorrect MAGIC NUMBER\n");
                 }
 
                 fread(&num_nodes, sizeof(int), 1, fp);
                 if(num_nodes <= 0){
-                  printf("ERR: Number of nodes are 0 or less");
-                  exit(EXIT_FAILURE);
+                    printf("ERR: Number of nodes are 0 or less");
+                    exit(EXIT_FAILURE);
+                }else{
+                    printf("Num nodes: %d \n", num_nodes);
                 }
-
+                
+                printf("tree");
+                
                 airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
                 init_tree(airports_tree);
-
+                
+                printf("arbre");
+                
                 if(!airports_tree){
                     printf("\nERR: Unable to create the tree.\n");
                     exit(EXIT_FAILURE);
                 }
 
-                /*Comprobar que esta parte del codigo funciona*/
-
-                char *airp;
-                int len;
-
+                int nDestinations, j;
+                
+                printf("lel");
+                
                 for (i=0;i<num_nodes; i++){
-                    fread(&len, sizeof(int), 1,fp);
-                    if(len <= 0){
-                        printf("ERR: length 0 or lesser");
-                        exit(EXIT_FAILURE);
+                    printf("Num nodes: %d \n", num_nodes);
+                    printf("i: %d\n", i);
+                    n_data = malloc(sizeof(*n_data));
+                    n_data->key = calloc(1,sizeof(char)*4);
+                    
+                    
+                    n_data->l = malloc(sizeof(list));
+                    init_list(n_data->l);
+                    
+                    fread(n_data->key, sizeof(char), 3, fp);
+                    n_data->key[3] = 0;  
+                    printf("key: %s \n", n_data->key);
+                    
+                    //number of destinations
+                    fread(&nDestinations, sizeof(int), 1,fp);                    
+                    printf("Num destinations: %d \n", nDestinations);
+                    
+                    for(j=0; j<nDestinations; j++){
+                        l_data = malloc(sizeof(* l_data)); 
+                        l_data->key = calloc(1,sizeof(char)*4);
+                        
+                        
+                        fread(l_data->key, sizeof(char), 3, fp);
+                        fread(&l_data->num_flights, sizeof(int), 1, fp);
+                        fread(&l_data->delay, sizeof(int), 1, fp);
+                        
+                        l_data->key[3] = 0;
+                        
+                        insert_list(n_data->l, l_data);
                     }
-
-                    airp = malloc(sizeof(char)*(len+1));
-                    fread(airp, sizeof(char), len, fp);
-                    airp[len] = 0;
-
-                    //fread(&num_destinations, sizeof(int),1,fp);
+                    n_data->num_destinations = nDestinations;
+                    insert_node(airports_tree, n_data);
 
                 }
-
-
 
                 fclose(fp);
 
@@ -432,7 +495,7 @@ int main(int argc, char **argv)
 
                             median = (float)l_data->delay/(float)l_data->num_flights;
 
-                            printf("   %s --> %.3f minutes\n", n_data->key, median);
+                            printf("   %s --> %s, Median Delay: %.3f minutes\n", n_data->key,l_data->key, median);
                             l_item = l_item->next;
 
                         }
