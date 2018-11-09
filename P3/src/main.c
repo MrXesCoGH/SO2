@@ -77,25 +77,23 @@ void split_fn(char *string, int col, char* result){
 }
 
 void writeTreeData(node_data *n_data, FILE *fp){
-  int len = strlen(n_data->key);
-  fwrite(&len, sizeof(int),1,fp);
-  fwrite(n_data->key, sizeof(char), strlen(n_data->key),fp);
-  fwrite(n_data->l, sizeof(list), n_data->l->num_items, fp);
-  fwrite(&n_data->num_destinations, sizeof(int),1,fp);
+    fwrite(n_data->key, sizeof(char), strlen(n_data->key),fp);
+    fwrite(&n_data->num_destinations, sizeof(int),1,fp);
+    fwrite(n_data->l, sizeof(list), n_data->l->num_items, fp);
 }
 
 void writeTreeRecursive(node *n, FILE *fp){
-  if(n->right != NIL)
-      writeTreeRecursive(n->right, fp);
-  if(n->left != NIL)
-      writeTreeRecursive(n->left, fp);
+      if(n->right != NIL)
+          writeTreeRecursive(n->right, fp);
+      if(n->left != NIL)
+          writeTreeRecursive(n->left, fp);
 
-  writeTreeData(n->data, fp);
+      writeTreeData(n->data, fp);
 }
 
 void writeTree(rb_tree *tree, FILE *fp){
-  if(tree->root != NIL)
-      writeTreeRecursive(tree->root, fp);
+    if(tree->root != NIL)
+        writeTreeRecursive(tree->root, fp);
 }
 
 int countTreeRecursive(node *n){
