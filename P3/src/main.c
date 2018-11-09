@@ -25,6 +25,7 @@ void split_fn(char* string, int col, char* result);
 void writeTreeData(node_data *n_data, FILE *fp);
 void writeTree(rb_tree *tree, FILE *fp);
 void writeTreeRecursive(node *n, FILE *fp);
+void writeTreeList(list *l, FILE *fp);
 int countTreeRecursive(node *n);
 
 int menu()
@@ -98,7 +99,6 @@ void writeTreeData(node_data *n_data, FILE *fp){
     fwrite(n_data->key, sizeof(char),3,fp);
     
     fwrite(&n_data->num_destinations, sizeof(int),1,fp);
-    printf("%d\n",n_data->num_destinations);
     
     writeTreeList(n_data->l,fp);
 }
@@ -108,7 +108,7 @@ void writeTreeRecursive(node *n, FILE *fp){
           writeTreeRecursive(n->right, fp);
       if(n->left != NIL)
           writeTreeRecursive(n->left, fp);
-      printf("key: %s\n", n->data->key);
+     
       writeTreeData(n->data, fp);
 }
 
@@ -345,7 +345,6 @@ int main(int argc, char **argv)
                 fgets(str1, MAXLINE, stdin);
                 str1[strlen(str1)-1]=0;
 
-                /* Falta codi */
                 fp = fopen(str1,"w");
 
                 if(!fp){
@@ -376,7 +375,6 @@ int main(int argc, char **argv)
                 fgets(str1, MAXLINE, stdin);
                 str1[strlen(str1)-1]=0;
 
-                /* Falta codi */
                 printf("Reading tree from file %s \n", str1);
 
                 fp = fopen(str1,"r");
@@ -403,13 +401,9 @@ int main(int argc, char **argv)
                     printf("Num nodes: %d \n", num_nodes);
                 }
                 
-                printf("tree");
-                
                 airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
                 init_tree(airports_tree);
-                
-                printf("arbre");
-                
+                                
                 if(!airports_tree){
                     printf("\nERR: Unable to create the tree.\n");
                     exit(EXIT_FAILURE);
@@ -417,25 +411,18 @@ int main(int argc, char **argv)
 
                 int nDestinations, j;
                 
-                printf("lel");
-                
                 for (i=0;i<num_nodes; i++){
-                    printf("Num nodes: %d \n", num_nodes);
-                    printf("i: %d\n", i);
                     n_data = malloc(sizeof(*n_data));
                     n_data->key = calloc(1,sizeof(char)*4);
-                    
                     
                     n_data->l = malloc(sizeof(list));
                     init_list(n_data->l);
                     
                     fread(n_data->key, sizeof(char), 3, fp);
                     n_data->key[3] = 0;  
-                    printf("key: %s \n", n_data->key);
                     
                     //number of destinations
                     fread(&nDestinations, sizeof(int), 1,fp);                    
-                    printf("Num destinations: %d \n", nDestinations);
                     
                     for(j=0; j<nDestinations; j++){
                         l_data = malloc(sizeof(* l_data)); 
@@ -463,10 +450,7 @@ int main(int argc, char **argv)
                 printf("Introdueix aeroport per cercar retard o polsa enter per saber l'aeroport amb mes destinacions: ");
                 fgets(str1, MAXLINE, stdin);
 
-                printf("String entrado: %s",str1);
-
                 if(str1[0] == '\n'){
-                    printf("Enter\n");
                     n_data = search(airports_tree);
                     if (n_data)
                         printf("\nAirport with more destinations: %s, number: %d \n\n", n_data->key, n_data->num_destinations);
@@ -481,7 +465,6 @@ int main(int argc, char **argv)
                     n_data = find_node(airports_tree, str1);
 
                     if(n_data){
-                        printf("Airport %s found \n", n_data->key);
 
                         list_item *l_item;
 
