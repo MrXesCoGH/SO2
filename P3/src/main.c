@@ -22,8 +22,10 @@
  */
 
 void split_fn(char* string, int col, char* result);
-
-
+void writeTreeData(node_data *n_data, FILE *fp);
+void writeTree(rb_tree *tree, FILE *fp);
+void writeTreeRecursive(node *n, FILE *fp);
+int countTreeRecursive(node *n);
 
 int menu()
 {
@@ -51,7 +53,7 @@ void split_fn(char *string, int col, char* result){
     int found = 0;
 
     while (i < strlen(string) && !found) {
-        
+
         if (string[i] == delim) {
             // Comma found
             col--;
@@ -74,6 +76,41 @@ void split_fn(char *string, int col, char* result){
     }
 }
 
+void writeTreeData(node_data *n_data, FILE *fp){
+  int len = strlen(n_data->key);
+  fwrite(&len, sizeof(int),1,fp);
+  fwrite(n_data->key, sizeof(char), strlen(n_data->key),fp);
+  fwrite(&n_data->num_destinations, sizeof(int),1,fp);
+}
+
+void writeTreeRecursive(node *n, FILE *fp){
+  if(n->right != NIL)
+      writeTreeRecursive(n->right, fp);
+  if(n->left != NIL)
+      writeTreeRecursive(n->left, fp);
+
+  writeTreeData(n->data, fp);
+}
+
+void writeTree(rb_tree *tree, FILE *fp){
+  if(tree->root != NIL)
+      writeTreeRecursive(tree->root, fp);
+}
+
+int countTreeRecursive(node *n){
+    int rightCount, leftCount;
+
+    rightCount = 0;
+    leftCount = 0;
+
+    if (n->right != NIL)
+      rightCount = countTreeRecursive(n->right);
+
+    if (n->left != NIL)
+      leftCount = countTreeRecursive(n->left);
+
+    return ((int)1) + rightCount + leftCount;
+}
 /**
  *
  *  Main procedure
@@ -83,7 +120,7 @@ void split_fn(char *string, int col, char* result){
 int main(int argc, char **argv)
 {
     char str1[MAXLINE], str2[MAXLINE];
-    int opcio;
+    int opcio, magicNumber, num_nodes, n;
 
     FILE *fp;
 
@@ -148,7 +185,7 @@ int main(int argc, char **argv)
                         init_list(n_data->l);
 
                         insert_node(airports_tree, n_data);
-                
+
                     }
                 }
 
@@ -159,7 +196,7 @@ int main(int argc, char **argv)
                 str2[strlen(str2)-1]=0;
 
                 char *origin, *destination, *delay;
-                
+
                 origin = ((char*) malloc(sizeof(char)*4));
                 delay = ((char*) malloc(sizeof(char)*10));
                 destination =((char*) malloc(sizeof(char)*5));
@@ -173,7 +210,7 @@ int main(int argc, char **argv)
                     return(-1);
                 }
 
-                fgets(str,400,fp); 
+                fgets(str,400,fp);
 
                 i = 0;
 
@@ -184,10 +221,10 @@ int main(int argc, char **argv)
                 *   - col. 15: Delay to the arriving airport, in minutes (int)
                 *   - col. 17: Origin airport, IATA Code.
                 *   - col. 18: Destiny airport, IATA Code.
-                */ 
-                
+                */
+
                 while(fgets(str, MAXLINE , fp) != NULL){
-                    
+
                     //Here it's stored the length of the char array.
                     int h = strlen(str);
 
@@ -196,20 +233,20 @@ int main(int argc, char **argv)
 
                     //this uses the splitting function to obtain the values of the delay, the origin and
                     //the destination of the airports.
-                    
+
                     split_fn(str,15, delay);
-                    
+
                     split_fn(str,17, origin);
-                    
+
                     split_fn(str,18, destination);
-                    
+
                     //this searchs if the node is already inside the tree.
 
                     n_data = find_node(airports_tree, origin);
-                    
+
                     if(n_data != NULL){
                        //printf("Airport found \n");
-                        
+
                         l_data = find_list(n_data->l,destination);
 
                         if(l_data != NULL){
@@ -226,12 +263,12 @@ int main(int argc, char **argv)
                             //In the case the found l_data is null, then a new one has to be created, because a new flight
                             //has to be added to the flights list.
                             l_data = malloc(sizeof(list_data));
-                            
+
                             //In the case of this strlen, the string has a \0 at the end which has to be considered.
                             l_data->key = malloc((strlen(destination)+1)*sizeof(char));
 
                             strcpy(l_data->key, destination);
-                            
+
                             //Since is the first flight for the airport, then the total number of flights starts as 1.
                             l_data->num_flights = 1;
 
@@ -239,11 +276,11 @@ int main(int argc, char **argv)
                             if(strcmp(delay, "NA")!=0){
                                 l_data->delay = atof(delay);
                             }
-                            
+
                             else{
                             //In this case, the flight has no delay so the total value of the delays happens to be 0.
                             l_data->delay = 0;
-                            
+
                             }
 
                             //Then this new flight has to be added to the flight list and the number of destinations of the airport
@@ -253,7 +290,7 @@ int main(int argc, char **argv)
                         }
                     }
                 }
-                
+
                 free(origin);
                 free(delay);
                 free(destination);
@@ -268,23 +305,53 @@ int main(int argc, char **argv)
                 str1[strlen(str1)-1]=0;
 
                 /* Falta codi */
-                fp = fopen(str,"w");
+                fp = fopen(str1,"w");
 
                 if(!fp){
                   printf("ERR: Failed at opening the file\n" );
                   exit(EXIT_FAILURE);
                 }
 
-                //Mirar como se escribe un fichero.
+                fwrite(&magicNumber, sizeof(int), 1, fp);
+
+                num_nodes = countTreeRecursive(airports_tree->root);
+                fwrite(&num_nodes, sizeof(int),1,fp);
+
+                writeTree(airports_tree,fp);
 
                 break;
 
             case 3:
+
+                delete_tree(airports_tree);
+                free(airports_tree);
+
+                airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
+                init_tree(airports_tree);
+
+                if(!airports_tree){
+                    printf("ERR: Unable to create the tree.\n");
+                    exit(EXIT_FAILURE);
+                }
+
                 printf("Introdueix nom del fitxer que conte l'arbre: ");
                 fgets(str1, MAXLINE, stdin);
                 str1[strlen(str1)-1]=0;
 
                 /* Falta codi */
+                fp = fopen(str,"r");
+
+                if(!fp){
+                    printf("ERR: Unable to open the file\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                fread(&magicNumber,sizeof(int),1,fp);
+                fread(&n, sizeof(int),1,fp);
+
+                //Aqui va la manera de cargar el arbol para n, donde n es el num de nodos.
+
+                fclose(fp);
 
                 break;
 
@@ -293,13 +360,13 @@ int main(int argc, char **argv)
                 fgets(str1, MAXLINE, stdin);
 
                 printf("String entrado: %s",str1);
-                
+
                 if(str1[0] == '\n'){
                     printf("Enter\n");
                     n_data = search(airports_tree);
                     if (n_data)
                         printf("\nAirport with more destinations: %s, number: %d \n\n", n_data->key, n_data->num_destinations);
-                    else 
+                    else
                         printf("No he trobat l'aeroport amb mes destinacions\n");
 
                 }else{
@@ -308,22 +375,22 @@ int main(int argc, char **argv)
                     printf("\nMedian delay for the airport %s:\n", str1);
 
                     n_data = find_node(airports_tree, str1);
-                    
+
                     if(n_data){
                         printf("Airport %s found \n", n_data->key);
-                    
+
                         list_item *l_item;
-                        
+
                         l_item = n_data->l->first;
-                        
+
                         i=0;
                         while(l_item != NULL){
                             i++;
                             float median;
                             l_data = l_item->data;
-                            
+
                             median = (float)l_data->delay/(float)l_data->num_flights;
-                            
+
                             printf("   %s --> %.3f minutes\n", n_data->key, median);
                             l_item = l_item->next;
 
