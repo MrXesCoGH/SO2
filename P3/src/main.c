@@ -359,8 +359,8 @@ int main(int argc, char **argv)
                 }
 
                 fread(&num_nodes, sizeof(int), 1, fp);
-                if(num_nodes < = 0){
-                  prinf("ERR: Number of nodes are 0 or less");
+                if(num_nodes <= 0){
+                  printf("ERR: Number of nodes are 0 or less");
                   exit(EXIT_FAILURE);
                 }
 
@@ -372,17 +372,26 @@ int main(int argc, char **argv)
                     exit(EXIT_FAILURE);
                 }
 
+                /*Comprobar que esta parte del codigo funciona*/
+
+                char *airp;
+                int len;
+
                 for (i=0;i<num_nodes; i++){
                     fread(&len, sizeof(int), 1,fp);
                     if(len <= 0){
                         printf("ERR: length 0 or lesser");
                         exit(EXIT_FAILURE);
                     }
+
+                    airp = malloc(sizeof(char)*(len+1));
+                    fread(airp, sizeof(char), len, fp);
+                    airp[len] = 0;
+
+                    
                 }
 
 
-
-                //Aqui va la manera de cargar el arbol para n, donde n es el num de nodos.
 
                 fclose(fp);
 
