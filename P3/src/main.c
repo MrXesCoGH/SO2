@@ -80,6 +80,7 @@ void writeTreeData(node_data *n_data, FILE *fp){
   int len = strlen(n_data->key);
   fwrite(&len, sizeof(int),1,fp);
   fwrite(n_data->key, sizeof(char), strlen(n_data->key),fp);
+  fwrite(n_data->l, sizeof(list), n_data->l->num_items, fp);
   fwrite(&n_data->num_destinations, sizeof(int),1,fp);
 }
 
@@ -120,7 +121,7 @@ int countTreeRecursive(node *n){
 int main(int argc, char **argv)
 {
     char str1[MAXLINE], str2[MAXLINE];
-    int opcio, magicNumber, num_nodes, n;
+    int opcio, magicNumber, num_nodes;
 
     FILE *fp;
 
@@ -300,6 +301,13 @@ int main(int argc, char **argv)
                 break;
 
             case 2:
+                if(!airports_tree){
+                    printf("ERR: There's no tree in memory");
+                    break;
+                }
+
+                magicNumber = MAGIC_NUMBER;
+
                 printf("Introdueix el nom de fitxer en el qual es desara l'arbre: ");
                 fgets(str1, MAXLINE, stdin);
                 str1[strlen(str1)-1]=0;
@@ -315,6 +323,7 @@ int main(int argc, char **argv)
                 fwrite(&magicNumber, sizeof(int), 1, fp);
 
                 num_nodes = countTreeRecursive(airports_tree->root);
+
                 fwrite(&num_nodes, sizeof(int),1,fp);
 
                 writeTree(airports_tree,fp);
@@ -322,16 +331,10 @@ int main(int argc, char **argv)
                 break;
 
             case 3:
-
-                delete_tree(airports_tree);
-                free(airports_tree);
-
-                airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
-                init_tree(airports_tree);
-
-                if(!airports_tree){
-                    printf("ERR: Unable to create the tree.\n");
-                    exit(EXIT_FAILURE);
+                if(airports_tree){
+                    printf("\nFreeing the actual tree\n");
+                    delete_tree(airports_tree);
+                    free(airports_tree);
                 }
 
                 printf("Introdueix nom del fitxer que conte l'arbre: ");
@@ -339,6 +342,8 @@ int main(int argc, char **argv)
                 str1[strlen(str1)-1]=0;
 
                 /* Falta codi */
+                printf("Reading tree from file %s \n", str1);
+
                 fp = fopen(str,"r");
 
                 if(!fp){
@@ -347,7 +352,35 @@ int main(int argc, char **argv)
                 }
 
                 fread(&magicNumber,sizeof(int),1,fp);
-                fread(&n, sizeof(int),1,fp);
+
+                if (magicNumber != MAGIC_NUMBER){
+                  printf("ERR: Incorrect magic number");
+                  exit(EXIT_FAILURE);
+                }
+
+                fread(&num_nodes, sizeof(int), 1, fp);
+                if(num_nodes < = 0){
+                  prinf("ERR: Number of nodes are 0 or less");
+                  exit(EXIT_FAILURE);
+                }
+
+                airports_tree = (rb_tree *) malloc(sizeof(rb_tree));
+                init_tree(airports_tree);
+
+                if(!airports_tree){
+                    printf("\nERR: Unable to create the tree.\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                for (i=0;i<num_nodes; i++){
+                    fread(&len, sizeof(int), 1,fp);
+                    if(len <= 0){
+                        printf("ERR: length 0 or lesser");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+
+
 
                 //Aqui va la manera de cargar el arbol para n, donde n es el num de nodos.
 
