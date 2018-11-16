@@ -210,31 +210,10 @@ static int extract_fields_airport(char *line, flight_information *fi) {
     return invalid;
 }
 
-/**
- *
- * Esta funcion lee los datos de los vuelos y los inserta en el 
- * arbol (previamente creado)
- *
- */
 
-void read_airports_data(rb_tree *tree, FILE *fp) {
-    char line[MAXCHAR];
-    int invalid;
-
-    flight_information fi;
-
-    node_data *n_data;
-    list_data *l_data;
-
-    struct timeval tv1, tv2;
-
-    /* Leemos la cabecera del fichero */
-    fgets(line, MAXCHAR, fp);
-
-    /* Tiempo cronologico */
-    gettimeofday(&tv1, NULL);
-    
-    while (fgets(line, MAXCHAR, fp) != NULL)
+void funcio(rb_tree *tree, FILE *fp, flight_information fi, int invalid, char* line, node_data *n_data, list_data *l_data)
+{
+     while (fgets(line, MAXCHAR, fp) != NULL)
     {
         invalid = extract_fields_airport(line, &fi);
 
@@ -265,7 +244,39 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
             }
         }
     }
+}
 
+
+/**
+ *
+ * Esta funcion lee los datos de los vuelos y los inserta en el 
+ * arbol (previamente creado)
+ *
+ */
+
+void read_airports_data(rb_tree *tree, FILE *fp) {
+    char line[MAXCHAR];
+    int invalid;
+
+    flight_information fi;
+
+    node_data *n_data;
+    list_data *l_data;
+
+    struct timeval tv1, tv2;
+
+    /* Leemos la cabecera del fichero */
+    fgets(line, MAXCHAR, fp);
+
+    /* Tiempo cronologico */
+    gettimeofday(&tv1, NULL);
+    
+    n_data = NULL;
+    l_data = NULL;
+    invalid = 0;
+   
+    funcio(tree, fp, fi, invalid, line, n_data, l_data);
+    
     /* Tiempo cronologico */
     gettimeofday(&tv2, NULL);
 
@@ -274,6 +285,8 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
             (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
             (double) (tv2.tv_sec - tv1.tv_sec));
 }
+
+
 
 
 
