@@ -30,10 +30,6 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
 {
     FILE *fp;
     rb_tree *tree;
-    
-    struct param *parameters; 
-    pthread_t threads;
-    int err;
 
     /* Reservamos memoria */ 
     tree = (rb_tree *) malloc(sizeof(rb_tree));
@@ -51,20 +47,7 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     /* Leemos los datos de ficheros de aeropuertos */ 
     init_tree(tree);
     
-    parameters = malloc(sizeof(struct param));
-    
-    parameters->fp = fp; 
-    parameters->tree= tree;
-    
-    pthread_create(&threads,NULL,(void *)read_airports,(void*) parameters);
-    
-    if(err != 0){
-        printf("Unable to create the thread.\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    pthread_join(threads,NULL);
-    
+    read_airports(tree,fp);
     
     fclose(fp);
 
@@ -291,11 +274,10 @@ void sub_thread(void *arguments)
                     l_data->retardo_total = fi.delay; 
                     
                     pthread_mutex_lock(&mutex);
-                                       
+                    
                     insert_list(n_data->l, l_data);
        
                     pthread_mutex_unlock(&mutex);
-                    
                 }
 
             } else {
@@ -336,7 +318,7 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
     parameters->tree = tree;
     
     for(i = 0; i<2; i++){
-        pthread_create(&(threads[i]), NULL, sub_thread, (void *) parameters);
+        pthread_create(&(threads[i]), NULL,(void *) sub_thread, (void *) parameters);
     }
     
     for(i=0;i<2;i++){
