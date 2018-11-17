@@ -15,17 +15,25 @@
 
 //creating the thread locker
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 /**
  *
  * Esta funcion crea el arbol a partir de los datos de los aeropuertos y de los ficheros de retardo
  *
  */
 
+struct param{
+    FILE *fp;
+    rb_tree *tree;  
+};
+
 rb_tree *create_tree(char *str_airports, char *str_dades)
 {
     FILE *fp;
     rb_tree *tree;
+    
+    struct param *parameters; 
+    pthread_t threads;
+    int err;
 
     /* Reservamos memoria */ 
     tree = (rb_tree *) malloc(sizeof(rb_tree));
@@ -43,8 +51,19 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     /* Leemos los datos de ficheros de aeropuertos */ 
     init_tree(tree);
     
+    parameters = malloc(sizeof(struct param));
     
-    read_airports(tree, fp); 
+    parameters->fp = fp; 
+    parameters->tree= tree;
+    
+    pthread_create(&threads,NULL,(void *)read_airports,(void*) parameters);
+    
+    if(err != 0){
+        printf("Unable to create the thread.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    pthread_join(threads,NULL);
     
     
     fclose(fp);
@@ -113,7 +132,7 @@ void read_airports(rb_tree *tree, FILE *fp)
 
     fgets(line, 100, fp);
     
-    num_airports = atoi(line);
+    num_airports = atoi(line); 
     
     tree_filling_thread(tree,fp,num_airports,n_data,line);
     
@@ -236,14 +255,25 @@ static int extract_fields_airport(char *line, flight_information *fi) {
  */
 
 
-void sub_thread(rb_tree *tree, FILE *fp, flight_information fi, int invalid, char* line, node_data *n_data, list_data *l_data)
+void sub_thread(void *arguments)
 {
-     while (fgets(line, MAXCHAR, fp) != NULL)
+    char line[MAXCHAR];
+    int invalid;
+    
+    flight_information fi;
+    
+    node_data *n_data;
+    list_data *l_data;
+    
+    struct param *parameters = (struct param *) arguments;
+    
+    
+    while (fgets(line, MAXCHAR, parameters->fp) != NULL)
     {
         invalid = extract_fields_airport(line, &fi);
 
         if (!invalid) {
-            n_data = find_node(tree, fi.origin);
+            n_data = find_node(parameters->tree, fi.origin);
 
             if (n_data) {
                 l_data = find_list(n_data->l, fi.destination);
@@ -259,8 +289,13 @@ void sub_thread(rb_tree *tree, FILE *fp, flight_information fi, int invalid, cha
 
                     l_data->numero_vuelos = 1;
                     l_data->retardo_total = fi.delay; 
-
+                    
+                    pthread_mutex_lock(&mutex);
+                                       
                     insert_list(n_data->l, l_data);
+       
+                    pthread_mutex_unlock(&mutex);
+                    
                 }
 
             } else {
@@ -281,33 +316,33 @@ void sub_thread(rb_tree *tree, FILE *fp, flight_information fi, int invalid, cha
 
 void read_airports_data(rb_tree *tree, FILE *fp) {
     char line[MAXCHAR];
-    int invalid;
-
+    int invalid, i;
+    
     flight_information fi;
-
-    node_data *n_data;
-    list_data *l_data;
-
+    
     struct timeval tv1, tv2;
 
     /* Leemos la cabecera del fichero */
     fgets(line, MAXCHAR, fp);
-
+    
+    pthread_t threads[2];
+    struct param *parameters;
+    
     /* Tiempo cronologico */
     gettimeofday(&tv1, NULL);
     
-    //In order to use the sub_thread we need to initialize the values of n_data, l_data and invalid.
+    parameters = malloc(sizeof(struct param));
+    parameters->fp = fp;
+    parameters->tree = tree;
     
-    n_data = NULL;
-    l_data = NULL;
-    invalid = 0;
+    for(i = 0; i<2; i++){
+        pthread_create(&(threads[i]), NULL, sub_thread, (void *) parameters);
+    }
     
-    pthread_mutex_lock(&mutex);
-   
-    sub_thread(tree, fp, fi, invalid, line, n_data, l_data);
-    
-    pthread_mutex_unlock(&mutex);
-    
+    for(i=0;i<2;i++){
+        pthread_join(threads[i],NULL);        
+    }
+           
     /* Tiempo cronologico */
     gettimeofday(&tv2, NULL);
 
@@ -315,6 +350,9 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
     printf("Tiempo para crear el arbol: %f segundos\n",
             (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
             (double) (tv2.tv_sec - tv1.tv_sec));
+    
+    
+    free(parameters);
 }
 
 

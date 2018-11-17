@@ -8,10 +8,10 @@ TARGET = main
 
 # Compilation options
 #CFLAGS = -Wall -Werror -g -ansi -pedantic
-CFLAGS = -Wall -Werror -O
+CFLAGS = -O
 
 # Linker options 
-LFLAGS = -lm
+LFLAGS = -lm -lpthread
 
 # There is no need to change the instructions below this
 # line. Change if you really know what you are doing.
