@@ -8,7 +8,7 @@ TARGET = main
 
 # Compilation options
 #CFLAGS = -Wall -Werror -g -ansi -pedantic
-CFLAGS = -O
+CFLAGS = -Werror -Wall -O
 
 # Linker options 
 LFLAGS = -lm -lpthread

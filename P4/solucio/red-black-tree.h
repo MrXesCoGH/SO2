@@ -26,7 +26,7 @@ typedef struct node_data_
     // The variable used to index the tree has to be called "key".
     // The type may be any you want (float, char *, etc)
     RBTREE_KEY_TYPE key;     
-
+    pthread_mutex_t mutex; 
     // This is the additional information that will be stored
     // within the structure. You may adapt it to your needs:
     // add or remove fields as you need.

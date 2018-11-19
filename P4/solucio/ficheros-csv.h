@@ -9,6 +9,8 @@
 #define AEROPUERTO_ORIGEN 17
 #define AEROPUERTO_DESTINO 18
 
+#define NUM_LINES 300
+
 typedef struct flight_information {
     char origin[4];
     char destination[4];
