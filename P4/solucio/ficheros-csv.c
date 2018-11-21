@@ -12,6 +12,7 @@
 
 #include "ficheros-csv.h"
 
+#define N_THREADS 1
 
 //creating the thread locker
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -31,6 +32,10 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     FILE *fp;
     rb_tree *tree;
 
+    pthread_t th;
+    struct param *p;
+    int err; 
+    
     /* Reservamos memoria */ 
     tree = (rb_tree *) malloc(sizeof(rb_tree));
 
@@ -47,8 +52,20 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     /* Leemos los datos de ficheros de aeropuertos */ 
     init_tree(tree);
     
-    read_airports(tree,fp);
+    p = malloc(sizeof(struct param));
+    p->fp = fp;
+    p->tree = tree;
     
+    err = pthread_create(&th,NULL,(void*) read_airports, (void*) p);
+    
+    if (err != 0){
+        printf("Unable to create the thread.\n");
+        exit(EXIT_FAILURE);
+        
+    }
+    
+    pthread_join(th,NULL);
+       
     fclose(fp);
 
     /* Abrimos el fichero con los datos de los vuelos */
@@ -62,7 +79,7 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     }
 
     /* Se leen los datos y se introducen en el arbol */
-    read_airports_data(tree, fp);
+    read_airports_data(p->tree, p->fp);
     fclose(fp);
 
     return tree;
@@ -83,6 +100,10 @@ void tree_filling_thread(rb_tree *tree, FILE *fp, int num_airports, node_data *n
 
         /* Copiamos los datos al nodo */
         n_data->key = malloc(sizeof(char) * 4);
+        
+        pthread_mutex_t node_mutex = PTHREAD_MUTEX_INITIALIZER;
+        n_data->mutex = node_mutex;
+        
         strcpy(n_data->key, line);
 
         /* Inicializamos la lista */
@@ -93,10 +114,9 @@ void tree_filling_thread(rb_tree *tree, FILE *fp, int num_airports, node_data *n
          * comprobar si ya existen previamente.
          */
         insert_node(tree, n_data);
-
         i++;
     }
-    
+    printf("Tree filled.\n");
 }
 
 
@@ -106,18 +126,20 @@ void tree_filling_thread(rb_tree *tree, FILE *fp, int num_airports, node_data *n
  *
  */
 
-void read_airports(rb_tree *tree, FILE *fp) 
+void read_airports(void *args) 
 {
     int num_airports;
     char line[MAXCHAR];
+    
+    struct param *p = (struct param*) args;
 
     node_data *n_data = NULL;
 
-    fgets(line, 100, fp);
+    fgets(line, 100, p->fp);
     
     num_airports = atoi(line); 
     
-    tree_filling_thread(tree,fp,num_airports,n_data,line);
+    tree_filling_thread(p->tree,p->fp,num_airports,n_data,line);
     
 }
 
@@ -237,54 +259,56 @@ static int extract_fields_airport(char *line, flight_information *fi) {
  *  This is the thread that fills the tree with the elements of the airports file and the data file.
  */
 
-void tree_filler(flight_information *fi_list, struct param *parameters){
+void tree_filler(char* origin,char* dest,char* delay, struct param *parameters){
     int current_line = 0;
     
     node_data *n_data;
     list_data *l_data;
     
-    while(current_line< NUM_LINES){
-        n_data = find_node(parameters->tree, fi_list[current_line].origin);
+    while(current_line < NUM_LINES/N_THREADS){
+        n_data = find_node(parameters->tree, origin);
         
         if (n_data) {
-            pthread_mutex_lock(&n_data->mutex);
             
-            l_data = find_list(n_data->l, fi_list[current_line].destination);
+            
+            l_data = find_list(n_data->l, destination);
 
             if (l_data) {
                 l_data->numero_vuelos += 1;
-                l_data->retardo_total += fi_list[current_line].delay;
+                l_data->retardo_total += delay;
             } else {
                 l_data = malloc(sizeof(list_data));
 
                 l_data->key = malloc(sizeof(char) * 4);
-                strcpy(l_data->key, fi_list[current_line].destination);
+                strcpy(l_data->key, destination);
 
                 l_data->numero_vuelos = 1;
-                l_data->retardo_total = fi_list[current_line].delay; 
+                l_data->retardo_total = delay; 
                 
+                pthread_mutex_lock(&n_data->mutex);
                 insert_list(n_data->l, l_data);
-                
+                pthread_mutex_unlock(&n_data->mutex);
             }
-            pthread_mutex_unlock(&n_data->mutex);
             
+          
         } else {
-            printf("ERROR: aeropuerto %s no encontrado en el arbol.\n", fi_list[current_line].origin);
+            printf("ERROR: aeropuerto %s no encontrado en el arbol.\n", origin);
             exit(1);
+            
         }
         
         current_line++;
     }
 }
 
-void sub_thread(void *arguments)
+void *sub_thread(void *arguments)
 {
     char line[MAXCHAR];
     int invalid, current_line;
     
     flight_information fi, *fi_list;
     
-    fi_list = malloc(sizeof(flight_information));
+    fi_list = malloc(sizeof(flight_information)*NUM_LINES);
     
     struct param *parameters = (struct param *) arguments;
     
@@ -292,19 +316,27 @@ void sub_thread(void *arguments)
     
     pthread_mutex_lock(&mutex);
     
-    while ((current_line< NUM_LINES) && fgets(line, MAXCHAR, parameters->fp) != NULL)
+    while ((current_line<NUM_LINES) && fgets(line, MAXCHAR, parameters->fp) != NULL)
     {
-        invalid = extract_fields_airport(line, &fi);
-
-        if (!invalid) {
-            fi_list[current_line] = fi;
-            
-        }
+        line[strlen(line)-1] = '\0';
+        fi_list[current_line] = malloc(sizeof(char)*MAXCHAR);
+        strcpy(fi_list[current_line],line);
+        
+        current_line++;
     }
     
     pthread_mutex_unlock(&mutex);
     
-    tree_filler(fi_list, parameters);
+    for(int i = 0; i<NUM_LINES; i++){
+        invalid = extract_fields_airport(fi_list[i], &fi);
+
+        if (!invalid) {
+            tree_filler(fi.origin, fi.destination, fi.delay, parameters);
+        }
+        
+    }
+    
+ 
 }
 
 
@@ -324,7 +356,7 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
     /* Leemos la cabecera del fichero */
     fgets(line, MAXCHAR, fp);
     
-    pthread_t threads[2];
+    pthread_t threads[N_THREADS];
     struct param *parameters;
     
     /* Tiempo cronologico */
@@ -334,11 +366,13 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
     parameters->fp = fp;
     parameters->tree = tree;
     
-    for(i = 0; i<2; i++){
+    for(i = 0; i<N_THREADS; i++){
+        
         pthread_create(&(threads[i]), NULL,(void *) sub_thread, (void *) parameters);
+       
     }
     
-    for(i=0;i<2;i++){
+    for(i= 0;i<N_THREADS;i++){
         pthread_join(threads[i],NULL);        
     }
            

@@ -19,5 +19,5 @@ typedef struct flight_information {
 
 
 rb_tree *create_tree(char *str_airports, char *str_dades);
-void read_airports(rb_tree *tree, FILE *fp);
+void read_airports(void *args);
 void read_airports_data(rb_tree *tree, FILE *fp);
