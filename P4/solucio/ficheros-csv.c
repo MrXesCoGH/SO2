@@ -11,9 +11,6 @@
 #include <pthread.h>
 
 #include "ficheros-csv.h"
-
-#define N_THREADS 1
-
 //creating the thread locker
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 /**
@@ -269,8 +266,7 @@ void tree_filler(char* origin,char* destination,int delay, struct param *paramet
         n_data = find_node(parameters->tree, origin);
 
         if (n_data) {
-
-
+            pthread_mutex_lock(&n_data->mutex);
             l_data = find_list(n_data->l, destination);
 
             if (l_data) {
@@ -285,10 +281,11 @@ void tree_filler(char* origin,char* destination,int delay, struct param *paramet
                 l_data->numero_vuelos = 1;
                 l_data->retardo_total = delay;
 
-                pthread_mutex_lock(&n_data->mutex);
+
                 insert_list(n_data->l, l_data);
-                pthread_mutex_unlock(&n_data->mutex);
+
             }
+            pthread_mutex_unlock(&n_data->mutex);
 
 
         } else {
@@ -337,7 +334,6 @@ void sub_thread(void *arguments)
 
     }
 }
-
 
 /**
  *
