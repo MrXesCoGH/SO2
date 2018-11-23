@@ -1,6 +1,6 @@
 /**
  *
- * Practica 3 
+ * Practica 3
  *
  */
 
@@ -18,12 +18,12 @@
 #define MAGIC_NUMBER 0x0133C8F9
 
 /**
- * 
+ *
  *  Menu
- * 
+ *
  */
 
-int menu() 
+int menu()
 {
     char str[5];
     int opcio;
@@ -37,13 +37,13 @@ int menu()
     printf("   Escull opcio: ");
 
     fgets(str, 5, stdin);
-    opcio = atoi(str); 
+    opcio = atoi(str);
 
     return opcio;
 }
 
 /**
- * 
+ *
  *  Main procedure
  *
  */
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
                 fgets(str2, MAXLINE, stdin);
                 str2[strlen(str2)-1]=0;
 
-                tree = create_tree(str1, str2); 
+                tree = create_tree(str1, str2);
 
                 break;
 
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
                 fgets(str1, MAXLINE, stdin);
                 str1[strlen(str1)-1]=0;
 
-                save_tree(tree, str1); 
+                save_tree(tree, str1);
 
                 break;
 
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
                 fgets(str1, MAXLINE, stdin);
                 str1[strlen(str1)-1]=0;
 
-                tree = load_tree(str1); 
+                tree = load_tree(str1);
 
                 break;
 
@@ -133,7 +133,6 @@ int main(int argc, char **argv)
                     printf("Media de retardos para %s\n", str1);
                     estadisticas_media_retardos(tree, str1);
                 } else {
-                    printf("\nAeropuerto con mas destinos\n");
                     estadisticas_max_destinos(tree);
                 }
 
@@ -159,4 +158,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-

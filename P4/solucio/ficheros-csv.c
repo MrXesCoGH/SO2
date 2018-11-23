@@ -76,7 +76,7 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     }
 
     /* Se leen los datos y se introducen en el arbol */
-    read_airports_data(p->tree, p->fp);
+    read_airports_data(tree,fp);
     fclose(fp);
 
     return tree;
@@ -262,7 +262,7 @@ void tree_filler(char* origin,char* destination,int delay, struct param *paramet
     node_data *n_data;
     list_data *l_data;
 
-    while(current_line < NUM_LINES/N_THREADS){
+    if(strlen(origin) >= 3){
         n_data = find_node(parameters->tree, origin);
 
         if (n_data) {
