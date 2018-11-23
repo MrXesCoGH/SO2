@@ -84,3 +84,4 @@ void init_tree(rb_tree *tree);
 void insert_node(rb_tree *tree, node_data *d);
 node_data *find_node(rb_tree *tree, RBTREE_KEY_TYPE key);
 void delete_tree(rb_tree *tree);
+int count_tree(rb_tree *tree);

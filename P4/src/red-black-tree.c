@@ -334,5 +334,3 @@ void delete_tree(rb_tree *tree)
     if (tree->root != NIL)
         delete_tree_recursive(tree->root);
 }
-
-

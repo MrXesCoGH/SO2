@@ -9,8 +9,8 @@
 #define AEROPUERTO_ORIGEN 17
 #define AEROPUERTO_DESTINO 18
 
-#define NUM_LINES 300
-#define N_THREADS 5
+#define NUM_LINES 10000
+#define N_THREADS 4
 
 typedef struct flight_information {
     char origin[4];
@@ -20,5 +20,5 @@ typedef struct flight_information {
 
 
 rb_tree *create_tree(char *str_airports, char *str_dades);
-void read_airports(void *args);
+void read_airports(rb_tree *tree, FILE *fp);
 void read_airports_data(rb_tree *tree, FILE *fp);
