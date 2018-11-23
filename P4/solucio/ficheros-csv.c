@@ -266,7 +266,7 @@ void tree_filler(char* origin,char* destination,int delay, struct param *paramet
         n_data = find_node(parameters->tree, origin);
 
         if (n_data) {
-            pthread_mutex_lock(&n_data->mutex);
+            pthread_mutex_lock(&(n_data->mutex));
             l_data = find_list(n_data->l, destination);
 
             if (l_data) {
