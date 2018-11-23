@@ -1,10 +1,10 @@
 #pragma once
 
 #include "linked-list.h"
-
+#include <pthread.h>
 /**
  *
- * Red-black tree header 
+ * Red-black tree header
  *
  *
  */
@@ -17,7 +17,7 @@
  * structure according to your needs.  In order to make this library work, you
  * also need to adapt the functions comp_key1_less_than_key2,
  * comp_key1_equal_to_key2, and free_node_data. For the current implementation
- * the "key" member is used to index data within the tree. 
+ * the "key" member is used to index data within the tree.
  *
  */
 
@@ -25,13 +25,13 @@ typedef struct node_data_
 {
     // The variable used to index the tree has to be called "key".
     // The type may be any you want (float, char *, etc)
-    RBTREE_KEY_TYPE key;     
-    pthread_mutex_t mutex; 
+    RBTREE_KEY_TYPE key;
+    pthread_mutex_t mutex;
     // This is the additional information that will be stored
     // within the structure. You may adapt it to your needs:
     // add or remove fields as you need.
-    list *l;   
-} node_data; 
+    list *l;
+} node_data;
 
 /**
  *
@@ -55,9 +55,9 @@ typedef struct node_ {
 
 
 /**
- * 
+ *
  * Some definitions
- * 
+ *
  */
 
 #define NIL &sentinel  /* all leafs are sentinels */
@@ -82,6 +82,5 @@ typedef struct rb_tree_ {
 
 void init_tree(rb_tree *tree);
 void insert_node(rb_tree *tree, node_data *d);
-node_data *find_node(rb_tree *tree, RBTREE_KEY_TYPE key); 
+node_data *find_node(rb_tree *tree, RBTREE_KEY_TYPE key);
 void delete_tree(rb_tree *tree);
-
