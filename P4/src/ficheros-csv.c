@@ -250,9 +250,9 @@ void tree_filler(char* origin,char* destination,int delay, struct param *paramet
     n_data = find_node(parameters->tree, origin);
 
     if (n_data) {
-        
+
         pthread_mutex_lock(&(n_data->mutex));
-        
+
         l_data = find_list(n_data->l, destination);
 
         if (l_data) {
@@ -273,12 +273,10 @@ void tree_filler(char* origin,char* destination,int delay, struct param *paramet
         }
         pthread_mutex_unlock(&(n_data->mutex));
 
-
     } else {
         printf("ERROR: aeropuerto %s no encontrado en el arbol.\n", origin);
         exit(1);
     }
-    
 }
 
 void sub_thread(void *arguments)
@@ -291,27 +289,27 @@ void sub_thread(void *arguments)
     char fi_list[NUM_LINES][MAXCHAR];
 
     struct param *parameters = (struct param *) arguments;
-        
-    int llegint = 1;
 
-    while (llegint)
+    int reading = 1;
+
+    while (reading)
     {
         current_line = 0;
         pthread_mutex_lock(&mutex);
         for (int i = 0; i < NUM_LINES; i++){
-            
+
             if(fgets(line, MAXCHAR, parameters->fp) != NULL){
-            
+
                 strcpy(fi_list[i],line);
 
                 current_line = i;
             }else{
                 current_line = i;
-                llegint = 0;
-                break;                     
+                reading = 0;
+                break;
             }
         }
-        
+
         pthread_mutex_unlock(&mutex);
 
         for(int i = 0; i < current_line; i++){
