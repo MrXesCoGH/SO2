@@ -101,7 +101,7 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     struct read_par *rpar;
     struct process_par *ppar;
 
-    //Inicializamos el struct de lectura
+    //Inicializamos el struct de lectura i escritura
     rpar = malloc(sizeof(struct read_par));
     rpar->fp = fp;
     rpar->tx = 1;
