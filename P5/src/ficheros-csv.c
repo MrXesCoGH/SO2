@@ -551,8 +551,7 @@ void *consumer(void *args){
 
 
 void *process_file(void *args){
-  printf("************\n Consumer start\n");
-
+    
   pthread_t tid;
 
   struct process_par *par = (struct processor *) args;
@@ -561,12 +560,10 @@ void *process_file(void *args){
     pthread_join(tid,NULL);
   }
 
-  printf("Consumer end\n *************\n");
 }
 
 
 void *read_file(void *args){
-  printf("*************\n Producer start\n");
 
   pthread_t tid;
 
@@ -576,7 +573,4 @@ void *read_file(void *args){
     pthread_create(&tid,NULL,producer,(void *)args);
     pthread_join(tid,NULL);
   }
-
-
-  printf("Producer end\n *************\n");
 }
