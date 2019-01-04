@@ -454,6 +454,8 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
     free(parameters);
 }
 
+
+// Funcion que define el funcionamiento los productores
 void *producer(void *args){
   char line[MAXCHAR];
   struct read_par *par = (struct reader *) args;
@@ -479,6 +481,7 @@ void *producer(void *args){
   pthread_mutex_unlock(&mutex_prod_consum);
 }
 
+// Funcion que define el funcionamiento de los consumidores
 void *consumer(void *args){
   int invalid;
 
@@ -549,9 +552,9 @@ void *consumer(void *args){
   }
 }
 
-
+// Esta funcion hace la llamada a los consumidores
 void *process_file(void *args){
-    
+
   pthread_t tid;
 
   struct process_par *par = (struct processor *) args;
@@ -562,7 +565,7 @@ void *process_file(void *args){
 
 }
 
-
+// Esta funcion hace la llamada a los productores
 void *read_file(void *args){
 
   pthread_t tid;
