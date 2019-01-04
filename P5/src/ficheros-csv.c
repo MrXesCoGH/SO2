@@ -9,21 +9,35 @@
 #include <sys/time.h>
 
 #include <pthread.h>
-
 #include "ficheros-csv.h"
+
 //creating the thread locker
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-/**
- *
- * Esta funcion crea el arbol a partir de los datos de los aeropuertos y de los ficheros de retardo
- *
- */
+
+int waiting = 0, count = 0, send = 1, r = 0, w = 0;
+
+//mutex for the producer and consumer
+pthread_mutex_t mutex_prod_consum = PTHREAD_MUTEX_INITIALIZER;
+
+//the producer and consumer itselfs
+pthread_t producer, consumer[N_THREADS];
+
+//conditions for the producer and consumer
+pthread_cont_t cond_producer, cond_consumer;
+
+//buffer used by the producer and the consumer. It's shared.
+struct buffer *buff_pc;
 
 struct param{
     FILE *fp;
     rb_tree *tree;
 };
 
+/**
+ *
+ * Esta funcion crea el arbol a partir de los datos de los aeropuertos y de los ficheros de retardo
+ *
+ */
 rb_tree *create_tree(char *str_airports, char *str_dades)
 {
     FILE *fp;
@@ -69,7 +83,6 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
 
     return tree;
 }
-
 
 
 void tree_filling_thread(rb_tree *tree, FILE *fp, int num_airports, node_data *n_data, char *line){
@@ -366,6 +379,132 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
             (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
             (double) (tv2.tv_sec - tv1.tv_sec));
 
-
     free(parameters);
+}
+
+void *producer(void *args){
+  char line[MAXCHAR];
+  struct read_params *par = (struct reader *) args;
+
+  pthread_mutex_lock(&mutex_prod_consum);
+
+  if(count == N_THREADS){
+    pthread_cond_wait(&cond_producer, &mutex_prod_consum);
+  }
+
+  if(fgets(line, MAXCHAR, par->fp) != NULL){
+    strcpy(par->buffer->cell[w]->str,line);
+  }
+
+  if (feof(par->fp)){
+    par->tx = 0;
+    send = 0;
+  }
+
+  w = (w+1) % N_THREADS;
+  count++;
+  pthread_cond_broadcast(&cond_consumer);
+  pthread_mutex_unlock(&mutex_prod_consum);
+}
+
+void *consumer(void *args){
+  int invalid;
+
+  flight_information fi;
+
+  node_data *n_data;
+  list_data *l_data;
+
+  struct process_par *par = (struct processor *) args;
+
+  char *n_lines;
+
+  pthread_mutex_lock(&mutex_prod_consum);
+  while(count == 0){
+    pthread_cond_wait(&cond_consumer, &mutex_prod_consum):
+  }
+
+  if(send){
+    n_lines = malloc(sizeof(char) * (strlen(par->buffer->cell[r]->str)+1)):
+    n_lines[strlen(par->buffer->cell[r]->str)-1] = '\0';
+
+    strcpy(n_lines, par->buffer->cell[r]->str);
+    r = (r+1)% N_THREADS;
+    count--;
+
+    pthread_cond_broadcast(&cond_producer);
+  }else{
+    par->end = 0;
+  }
+
+  pthread_mutex_unlock(&mutex_prod_consum);
+
+  if(send){
+    invalid = extract_fields_airport(n_lines, &fi);
+
+    if(!invalid){
+      n_data = find_node(par->tree, fi.origin);
+
+      if(n_data){
+         pthread_mutex_lock(&n_data->mutex);
+
+         l_data = find_list(n_data->l, fi.destination);
+
+         if(l_data){
+           l_data->numero_vuelos += 1;
+           l-data->retardo_total += fi.delay;
+         }else{
+
+            l_data = malloc(sizeof(list_data));
+            l_data->key = malloc(sizeof(char) * 4);
+            strcpy(l_data->key, fi.destination);
+
+            l_data->numero_vuelos = 1;
+            l_data->retardo_total = fi.delay;
+
+            insert_list(n_data->l, l_data);
+
+         }
+
+         pthread_mutex_unlock(&n_data->mutex);
+
+      }else{
+         printf("ERR: Airport %s not found.\n", fi.origin);
+         exit(EXIT_FAILURE);
+      }
+    }
+    free(n_lines);
+  }
+}
+
+
+void *process_file(void *args){
+  printf("************\n Consumer start\n");
+
+  pthread_t tid;
+
+  struct process_par *par = (struct processor *) args;
+  while(par->end == 1 && send){
+    pthread_create(&tid,NULL,consumer,(void *) args);
+    pthread_join(tid,NULL);
+  }
+
+  printf("Consumer end\n *************\n");
+}
+
+
+void *read_file(void *args){
+  printf("*************\n Producer start\n");
+
+  pthread_t tid;
+
+  struct read_par *par = (struct reader *) args;
+
+  while(!feof(par->fp) && par->tx == 1){
+    pthread_create(&tid,NULL,producer,(void *)args);
+    pthread_join(tid,NULL);
+  }
+
+
+  printf("Producer end\n *************\n");
 }

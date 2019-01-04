@@ -19,6 +19,36 @@ typedef struct flight_information {
 } flight_information;
 
 
+typedef struct read_par{
+  FILE *fp;
+  int tx; //sending indicator
+  struct buffer *buff;
+} read_par;
+
+typedef struct process_par{
+  rb_tree *tree;
+  int tx; //sending indicator
+  int end;
+  struct buffer *buff;
+} process_par;
+
+struct buffer{
+  int size;
+  struct cell *cell[N_THREADS];
+};
+
+struct cell{
+  char str[1000];
+  int size;
+}
+
 rb_tree *create_tree(char *str_airports, char *str_dades);
 void read_airports(rb_tree *tree, FILE *fp);
 void read_airports_data(rb_tree *tree, FILE *fp);
+
+
+//functions for the producer and the consumers 
+void *producer(void *args);
+void *consumer(void *args);
+void *read_file(void *args);
+void *process_file(void *args);
