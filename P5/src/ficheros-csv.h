@@ -40,14 +40,14 @@ struct buffer{
 struct cell{
   char str[1000];
   int size;
-}
+};
 
-rb_tree *create_tree(char *str_airports, char *str_dades);
+rb_tree* create_tree(char *str_airports, char *str_dades);
 void read_airports(rb_tree *tree, FILE *fp);
 void read_airports_data(rb_tree *tree, FILE *fp);
 
 
-//functions for the producer and the consumers 
+//functions for the producer and the consumers
 void *producer(void *args);
 void *consumer(void *args);
 void *read_file(void *args);

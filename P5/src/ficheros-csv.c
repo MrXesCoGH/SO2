@@ -20,10 +20,10 @@ int waiting = 0, count = 0, send = 1, r = 0, w = 0;
 pthread_mutex_t mutex_prod_consum = PTHREAD_MUTEX_INITIALIZER;
 
 //the producer and consumer itselfs
-pthread_t producer, consumer[N_THREADS];
+pthread_t prod, consum[N_THREADS];
 
 //conditions for the producer and consumer
-pthread_cont_t cond_producer, cond_consumer;
+pthread_cond_t cond_producer, cond_consumer;
 
 //buffer used by the producer and the consumer. It's shared.
 struct buffer *buff_pc;
@@ -46,6 +46,10 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
     pthread_t th;
     struct param *p;
     int err;
+
+    struct timeval tv1, tv2;
+
+    gettimeofday(&tv1, NULL);
 
     /* Reservamos memoria */
     tree = (rb_tree *) malloc(sizeof(rb_tree));
@@ -77,9 +81,77 @@ rb_tree *create_tree(char *str_airports, char *str_dades)
 
     }
 
-    /* Se leen los datos y se introducen en el arbol */
-    read_airports_data(tree,fp);
+
+    char line[MAXCHAR];
+
+    if(ftell(fp) == 0){
+      fgets(line,MAXCHAR,fp);
+    }
+
+    //Inicializamos el buffer:
+
+    buff_pc = malloc(sizeof(struct buffer));
+
+    for (int i = 0; i< N_THREADS; i++){
+      buff_pc->cell[i]=malloc(sizeof(struct cell));
+    }
+
+    //Estos son dos estructuras que almacenan datos que usaran los productores
+    //y consumidores.
+    struct read_par *rpar;
+    struct process_par *ppar;
+
+    //Inicializamos el struct de lectura
+    rpar = malloc(sizeof(struct read_par));
+    rpar->fp = fp;
+    rpar->tx = 1;
+    rpar->buff = buff_pc;
+
+    pthread_create(&prod, NULL, read_file, (void *)rpar);
+    ppar = malloc(sizeof(struct process_par));
+
+    for(int i = 0; i<N_THREADS; i++){
+      ppar->tree = tree;
+      ppar->tx = 1;
+      ppar->end = 1;
+      ppar->buff = buff_pc;
+      pthread_create(&consum[i],NULL,process_file,(void *)ppar);
+    }
+
+    pthread_join(prod,NULL);
+
+    for(int i = 0; i<N_THREADS;i++){
+      pthread_join(consum[i],NULL);
+    }
+
     fclose(fp);
+
+    free(rpar);
+    free(ppar);
+
+    for(int i = 0; i< N_THREADS; i++){
+      free(buff_pc->cell[i]);
+    }
+
+    free(buff_pc);
+    /* Se leen los datos y se introducen en el arbol. En este caso, como
+    utilizamos los productores y los consumidores no hace falta llamar a este
+    metodo. */
+    //read_airports_data(tree,fp);
+
+    /*
+    * Ya que no utilizamos la funcion de read_aiports_data es necesario contar
+    * el tiempo de ejecucion de otra manera, en este caso es coger la parte del
+    * codigo que contaba el tiempo y ponerlo a continuacion.
+    */
+
+    /* Tiempo cronologico */
+    gettimeofday(&tv2, NULL);
+
+    /* Tiempo para la creacion del arbol */
+    printf("Tiempo para crear el arbol: %f segundos\n",
+            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+            (double) (tv2.tv_sec - tv1.tv_sec));
 
     return tree;
 }
@@ -384,7 +456,7 @@ void read_airports_data(rb_tree *tree, FILE *fp) {
 
 void *producer(void *args){
   char line[MAXCHAR];
-  struct read_params *par = (struct reader *) args;
+  struct read_par *par = (struct reader *) args;
 
   pthread_mutex_lock(&mutex_prod_consum);
 
@@ -393,7 +465,7 @@ void *producer(void *args){
   }
 
   if(fgets(line, MAXCHAR, par->fp) != NULL){
-    strcpy(par->buffer->cell[w]->str,line);
+    strcpy(par->buff->cell[w]->str,line);
   }
 
   if (feof(par->fp)){
@@ -421,14 +493,14 @@ void *consumer(void *args){
 
   pthread_mutex_lock(&mutex_prod_consum);
   while(count == 0){
-    pthread_cond_wait(&cond_consumer, &mutex_prod_consum):
+    pthread_cond_wait(&cond_consumer, &mutex_prod_consum);
   }
 
   if(send){
-    n_lines = malloc(sizeof(char) * (strlen(par->buffer->cell[r]->str)+1)):
-    n_lines[strlen(par->buffer->cell[r]->str)-1] = '\0';
+    n_lines = malloc(sizeof(char) * (strlen(par->buff->cell[r]->str)+1));
+    n_lines[strlen(par->buff->cell[r]->str)-1] = '\0';
 
-    strcpy(n_lines, par->buffer->cell[r]->str);
+    strcpy(n_lines, par->buff->cell[r]->str);
     r = (r+1)% N_THREADS;
     count--;
 
@@ -452,7 +524,7 @@ void *consumer(void *args){
 
          if(l_data){
            l_data->numero_vuelos += 1;
-           l-data->retardo_total += fi.delay;
+           l_data->retardo_total += fi.delay;
          }else{
 
             l_data = malloc(sizeof(list_data));
